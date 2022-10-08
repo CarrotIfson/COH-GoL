@@ -6,17 +6,12 @@ async function main() {
   const network = hardhatArguments.network ? hardhatArguments.network : 'dev';
   const [deployer] = await ethers.getSigners();
   console.log('deployer address: ', deployer.address);
+ 
 
-  const Floppy = await ethers.getContractFactory("Floppy");
-  const floppy = await Floppy.deploy();
-  console.log('Deployed Floppy on: ', floppy.address);
-  Config.setConfig(network + '.Floppy', floppy.address); 
-
-
-  const Vault = await ethers.getContractFactory("Vault");
-  const vault = await Vault.deploy();
-  console.log("Deployed Vault on: ", vault.address);
-  Config.setConfig(network + '.Vault', vault.address);
+  const CGoL = await ethers.getContractFactory("GCOL");
+  const cGoL = await CGoL.deploy();
+  console.log("Deployed cGoL on: ", cGoL.address);
+  Config.setConfig(network + '.cGoL', cGoL.address);
   await Config.updateConfig();
 }
 
