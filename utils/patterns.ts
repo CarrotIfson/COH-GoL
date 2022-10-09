@@ -35,3 +35,30 @@ export const GLIDER_END  = [O, O, O, O,
                             O, O, l, O,
                             O, O, O, l,
                             O, l, l, l]; //spaceship p=4
+
+export const GLIDER_SEED = [O, l, O, O,
+                            O, O, l, O,
+                            l, l, l, O,
+                            O, O, O, O]; //spaceship p=4
+
+export const HUNDRED_SEED = [O, l, O, O, O, O, O, O, l, O,
+                             O, O, l, O, O, O, O, O, l, O,
+                             l, l, l, O, O, O, O, O, l, O,
+                             O, O, O, O, O, O, O, O, O, O,
+                             O, O, O, O, O, O, O, O, O, O, //5
+                             O, O, O, O, O, O, O, O, O, O,
+                             O, O, O, O, O, O, O, O, O, O,
+                             O, O, O, O, O, O, O, O, O, O,
+                             l, l, O, O, O, O, O, O, O, O,
+                             l, l, O, O, O, O, O, O, O, O]
+
+export const HUNDRED_END = [O, O, O, O, O, O, O, O, l, O,
+                            O, O, O, O, O, O, O, O, l, O,
+                            O, O, O, l, O, O, O, O, l, O,
+                            O, O, O, O, l, O, O, O, O, O,
+                            O, O, l, l, l, O, O, O, O, O, //5
+                            O, O, O, O, O, O, O, O, O, O,
+                            O, O, O, O, O, O, O, O, O, O,
+                            O, O, O, O, O, O, O, O, O, O,
+                            l, l, O, O, O, O, O, O, O, O,
+                            l, l, O, O, O, O, O, O, O, O] //p=8

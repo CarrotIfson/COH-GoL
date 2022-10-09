@@ -9,6 +9,7 @@ contract GCOL {
     uint8 public duration;
     bool[] public game_grid;
     uint8 public grid_length; 
+    address public winner;
 
     /*
     constructor(uint256 _duration, bool[] memory _seed) {
@@ -38,7 +39,7 @@ contract GCOL {
         return res; 
     }
 
-    function runGameBasic() public view returns(bool[] memory _game_grid) {  
+    function runGameBasic() public returns(bool[] memory _game_grid) {  
         /*
             r   r    r
         c   NW  N   NE
@@ -111,6 +112,7 @@ contract GCOL {
             unchecked { i += 1; }
             _game_grid =  copyArray(_res_game_grid);
         }
+        //winner = msg.sender;
         return _game_grid;
     } 
 

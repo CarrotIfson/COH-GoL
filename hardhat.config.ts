@@ -30,6 +30,11 @@ module.exports = {
       },
       saveDeployments: true
     },
+    cantomain: {
+      url: "https://jsonrpc.canto.nodestake.top/",
+      chainId: 7700,
+      accounts: [process.env.PRIV_KEY],  
+    },
     bsctest: {
       url: "https://data-seed-prebsc-2-s2.binance.org:8545",
       accounts: [process.env.PRIV_KEY],

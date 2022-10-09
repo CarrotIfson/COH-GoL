@@ -19,7 +19,7 @@ import { keccak256, stripZeros } from "ethers/lib/utils";
 //import { IERC20 } from "../typechain";
 import BigNumber from 'bignumber.js';
 import { Signer, BigNumberish } from "ethers"; 
-import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END }  from "../utils/patterns";
+import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END }  from "../utils/patterns";
 
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised); 
@@ -44,10 +44,10 @@ function arraysEqual(a: Array, b: Array) {
   }
 
 function logSquareMatrix(m: Array) {
-    const r = Math.sqrt(m.length);
+    const r = Math.sqrt(m.length); 
     console.log("-------------------");
     for (let i = 0; i < r; i++) {
-        console.log(m.slice(i*r,i*r+r));
+        console.log(m.slice(i*r,i*r+r).toString());
     }
     console.log("-------------------"); 
 }
@@ -89,30 +89,34 @@ describe("CantosGoL", function () {
 
     it("Should play the game", async function () {
         await cGoL.set_game(duration, CUBE_SEED, Math.sqrt(CUBE_SEED.length));  
-        let res = await cGoL.runGameBasic();
+        let res = await cGoL.callStatic.runGameBasic(); 
+
         expect(arraysEqual(res, CUBE_SEED)).to.equal(true);
- 
         await cGoL.set_game(3, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
-        res = await cGoL.runGameBasic();   
+        res = await cGoL.callStatic.runGameBasic();  
+
         expect(arraysEqual(res, BLINKER_SEED)).to.equal(false);
         await cGoL.set_game(8, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
-        res = await cGoL.runGameBasic();  
-        expect(arraysEqual(res, BLINKER_SEED)).to.equal(true); 
- 
+        res = await cGoL.callStatic.runGameBasic();  
+        expect(arraysEqual(res, BLINKER_SEED)).to.equal(true);  
+
         await cGoL.set_game(1, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
-        res = await cGoL.runGameBasic();   
+        res = await cGoL.callStatic.runGameBasic();   
         expect(arraysEqual(res, BEACON_SEED)).to.equal(false);
         await cGoL.set_game(6, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
-        res = await cGoL.runGameBasic();  
+        res = await cGoL.callStatic.runGameBasic();  
         expect(arraysEqual(res, BEACON_SEED)).to.equal(true); 
         await cGoL.set_game(1, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
-        res = await cGoL.runGameBasic();   
+        res = await cGoL.callStatic.runGameBasic();   
         expect(arraysEqual(res, GLIDER_END)).to.equal(false);
         
         await cGoL.set_game(4, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
-        res = await cGoL.runGameBasic();  
+        res = await cGoL.callStatic.runGameBasic();  
         expect(arraysEqual(res, GLIDER_END)).to.equal(true); 
 
 
-    })
+        await cGoL.set_game(8, HUNDRED_SEED, Math.sqrt(HUNDRED_SEED.length));
+        res = await cGoL.callStatic.runGameBasic();   
+        expect(arraysEqual(res, HUNDRED_END)).to.equal(true);   
+        })
 })
