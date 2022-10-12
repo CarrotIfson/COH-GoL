@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "hardhat test",
+    "test": "hardhat test", 
     "deploy": "hardhat run scripts/deploy.ts --network",
     "verify": "hardhat verify --network",
     "compile": "hardhat compile",

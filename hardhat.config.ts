@@ -13,13 +13,20 @@ dotenv.config({ path: __dirname + "/.env" });
  */
 module.exports = {
   solidity: {
+    version: "0.8.10",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 10000,
+      }
+    }/*,
     compilers: [
       {
         version: "0.8.10"
       }
-    ]
+    ]*/
   },
-  //defaultNetwork: "bsctest",
+  //defaultNetwork: "cantomain",
   networks: {
     dev: {
       url: "http://localhost:7545",

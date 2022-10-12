@@ -53,7 +53,7 @@ function logSquareMatrix(m: Array) {
 }
  
 
-describe("CantosGoL", function () {
+describe("ArrayBasic", function () {
     let owner: SignerWithAddress,
         susan: SignerWithAddress,
         bob: SignerWithAddress,
@@ -75,11 +75,10 @@ describe("CantosGoL", function () {
         console.log(`\tDeployed CGoL contract at ${cGoL.address}`);
 
  
-        await expect(cGoL.set_game(duration, SOME_SEED, 3)).revertedWith("grid should be a square");  
-        await cGoL.set_game(duration, SOME_SEED, 2);  
+        await expect(cGoL.setGameArrayBasic(duration, SOME_SEED, 3)).revertedWith("grid should be a square");  
+        await cGoL.setGameArrayBasic(duration, SOME_SEED, 2);  
   
         const currentBlock = await ethers.provider.getBlockNumber()+duration;  
-
         const game_grid = await cGoL.getGameGrid();
         expect(Number(await cGoL.getEndBlock())).to.equal(currentBlock);  
         //expect(arraysEqual(game_grid, SOME_SEED)).to.equal(true);
@@ -88,35 +87,35 @@ describe("CantosGoL", function () {
     })
 
     it("Should play the game", async function () {
-        await cGoL.set_game(duration, CUBE_SEED, Math.sqrt(CUBE_SEED.length));  
-        let res = await cGoL.callStatic.runGameBasic(); 
+        await cGoL.setGameArrayBasic(duration, CUBE_SEED, Math.sqrt(CUBE_SEED.length));  
+        let res = await cGoL.callStatic.runGameArrayBasic(); 
 
         expect(arraysEqual(res, CUBE_SEED)).to.equal(true);
-        await cGoL.set_game(3, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
-        res = await cGoL.callStatic.runGameBasic();  
+        await cGoL.setGameArrayBasic(3, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
+        res = await cGoL.callStatic.runGameArrayBasic();  
 
         expect(arraysEqual(res, BLINKER_SEED)).to.equal(false);
-        await cGoL.set_game(8, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
-        res = await cGoL.callStatic.runGameBasic();  
+        await cGoL.setGameArrayBasic(8, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
+        res = await cGoL.callStatic.runGameArrayBasic();  
         expect(arraysEqual(res, BLINKER_SEED)).to.equal(true);  
 
-        await cGoL.set_game(1, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
-        res = await cGoL.callStatic.runGameBasic();   
+        await cGoL.setGameArrayBasic(1, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
+        res = await cGoL.callStatic.runGameArrayBasic();   
         expect(arraysEqual(res, BEACON_SEED)).to.equal(false);
-        await cGoL.set_game(6, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
-        res = await cGoL.callStatic.runGameBasic();  
+        await cGoL.setGameArrayBasic(6, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
+        res = await cGoL.callStatic.runGameArrayBasic();  
         expect(arraysEqual(res, BEACON_SEED)).to.equal(true); 
-        await cGoL.set_game(1, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
-        res = await cGoL.callStatic.runGameBasic();   
+        await cGoL.setGameArrayBasic(1, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
+        res = await cGoL.callStatic.runGameArrayBasic();   
         expect(arraysEqual(res, GLIDER_END)).to.equal(false);
         
-        await cGoL.set_game(4, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
-        res = await cGoL.callStatic.runGameBasic();  
+        await cGoL.setGameArrayBasic(4, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
+        res = await cGoL.callStatic.runGameArrayBasic();  
         expect(arraysEqual(res, GLIDER_END)).to.equal(true); 
 
 
-        await cGoL.set_game(8, HUNDRED_SEED, Math.sqrt(HUNDRED_SEED.length));
-        res = await cGoL.callStatic.runGameBasic();   
+        await cGoL.setGameArrayBasic(8, HUNDRED_SEED, Math.sqrt(HUNDRED_SEED.length));
+        res = await cGoL.callStatic.runGameArrayBasic();   
         expect(arraysEqual(res, HUNDRED_END)).to.equal(true);   
         })
 })
