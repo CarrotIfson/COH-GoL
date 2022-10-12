@@ -125,10 +125,10 @@ export const B = 2;
 export const SOME_SEED_2P = [E, W, B, E]; //
 
 
-export const CUBE_SEED_2P = [E, E, E, E, E, E, E, E,
-                             W, W, E, E, E, E, E, E,
-                             W, W, E, E, E, E, B, B,
-                             E, E, E, E, E, E, B, B]
+export const CUBE_SEED_2P = [E, E, E, E, E, E, E, E, //7
+                             W, W, E, E, E, E, E, E, //15
+                             W, W, E, E, E, E, B, B, //23
+                             E, E, E, E, E, E, B, B] //31
 
 export const BLINKER_SEED_2P = [E, W, E, E, E, E, E, E,
                                 E, W, E, E, E, B, B, B,

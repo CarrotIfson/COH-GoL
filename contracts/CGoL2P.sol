@@ -30,12 +30,24 @@ contract GCOL2P {
         address winner;
     }
  
-    mapping(uint256 => Game) game_instances;
-    mapping(address => uint256[]) player_games; 
-    uint256 game_count; 
+    mapping(uint256 => Game) private game_instances ;
+    mapping(address => uint256[]) private player_games; 
+    uint256 private game_count; 
 
-    function setGameArray2P(uint8 _rows, uint8 _cols, uint8[] memory _seed, uint8 _duration, uint8 _iterations) public {
+    function check_grid(uint8[] calldata _seed) private pure {
+        for(uint i=0; i<_seed.length; ) {
+            if(_seed[i]!=0 &&
+                _seed[i]!=1 &&
+                _seed[i]!=2) {
+                    revert("_seed must contain only {1,2,3} values");
+                } 
+            unchecked{ i++;}
+        }
+    }
+
+    function setGameArray2P(uint8 _rows, uint8 _cols, uint8[] calldata _seed, uint8 _duration, uint8 _iterations) public {
         require(_rows*_cols == _seed.length, "_rows and _cols dont match _seed");
+        check_grid(_seed);
         //require(_grid_length < 15, "Max row length is 15"); TODO eventually see which is the biggest array we can handle with 60M Gas
         game_instances[game_count] = Game(
             _rows,
@@ -55,11 +67,8 @@ contract GCOL2P {
         game_count++;
     }
 
-
-
-
-    function copyArray(bool[] memory arr) public pure returns (bool[] memory) {
-        bool[] memory res = new bool[](arr.length);
+    function copyArray(uint8[] memory arr) public pure returns (uint8[] memory) {
+        uint8[] memory res = new uint8[](arr.length);
         
         for(uint8 x=0; x<arr.length; ){
             res[x] = arr[x];
@@ -68,85 +77,188 @@ contract GCOL2P {
         return res; 
     }
 
-/*
-    function runGameArrayBasic() public returns(bool[] memory _game_grid) {  
+
+    function runIterations(uint _gid) private { //returns(uint8[] memory) {  
         
-        //      r   r    r
-        //  c   NW  N   NE
-        //  c   W  CELL  E
-        //  c   SW  S   SE
+        //      c   c    c
+        //  r   NW  N   NE
+        //  r   W  CELL  E
+        //  r   SW  S   SE
         
 
-        _game_grid = game_grid;
-        bool[] memory _res_game_grid = copyArray(_game_grid);
-        uint8 num_alive_neighs;
-        uint8 grid_size = grid_length * grid_length;
+        Game memory game = game_instances[_gid];
+        uint8[] memory game_grid = game.game_grid;
+        
+        uint8[] memory _res_game_grid = copyArray(game_grid);
         bool isTopRow;
         bool isBottomRow;
-        bool isLeftEdge;
-        bool isRightEdge;
+        bool isLeftCol;
+        bool isRightCol;  
  
-        for(uint i=0; i<instance.duration; ) {   
-            for(uint c=0; c < instance.grid_size; ) { 
-                num_alive_neighs = 0; 
-                isTopRow = c < instance.grid_length;
-                isBottomRow = c >= instance.grid_length*(instance.grid_length-1);
-                isLeftEdge = c % instance.grid_length == 0;
-                isRightEdge = (c +1) % instance.grid_length == 0; 
-                // NW
-                if(!isTopRow && !isLeftEdge && _game_grid[c-instance.grid_length-1]) {
-                    num_alive_neighs++;
-                }
-                // N
-                if(!isTopRow && _game_grid[c-instance.grid_length]) {
-                    num_alive_neighs++; 
-                }
-                // NE
-                if(!isTopRow && !isRightEdge && _game_grid[c-instance.grid_length+1]) {
-                    num_alive_neighs++; 
+
+        uint8[] memory neighs = new uint8[](3);
+ 
+        uint8 cell; 
+        uint8 cols = game.cols; 
+        uint8 rows = game.rows;
+        uint8 bottom_delimiter = (rows-1)*cols;
+    
+        uint8 top_delta;
+        uint8 bottom_delta;
+
+        uint8 diff;
+    
+ 
+        for(uint i=0; i<game.iterations; ) {
+            console.log("Iteration: ", i);
+            /*for(r = 0; r < rows; ) {
+                if(r )
+                console.log("\tRow: ", r);
+                //check if its top or bottom row
+                for(c = 0; c < cols; ) {
+                    console.log("\t\tCol: ", c);
+                    unchecked{c++;}
                 } 
+                unchecked{r++;}
+            }*/
+            for(cell=0; cell<game.grid_length; ) {
+                
+                //num_wNeighs = 0;
+                //num_bNeighs = 0;
+
+                neighs[0] = 0;
+                neighs[1] = 0;
+                neighs[2] = 0;
+                /*
+                isTopRow = cell < cols;
+                isBottomRow = cell >= bottom_delimiter;
+                */
+                isLeftCol = cell % cols == 0; 
+                isRightCol = (cell+1) % cols == 0;
+
+                /*
+                if(isTopRow) {
+                    console.log("In top row, cell", cell);
+                }
+                if(isBottomRow) {
+                    console.log("In bottom row, cell", cell);
+                }
+                if(isLeftCol) {
+                    console.log("In left col, cell", cell);
+                }
+                if(isRightCol) {
+                    console.log("In right col, cell", cell);
+                }*/
+                
+                if(cell >= cols) { //!isTopRow
+                    top_delta = cell-cols;
+                    // SW
+                    if(!isLeftCol) {
+                        neighs[game_grid[top_delta-1]]++;
+                    }
+                    // S
+                    neighs[game_grid[top_delta]]++;
+                    // SE
+                    if(!isRightCol) {
+                        neighs[game_grid[top_delta+1]]++; 
+                    }
+
+                }
+                
+                if(cell < bottom_delimiter) { //!isBottomRow
+                    bottom_delta = cell+cols;
+                    // SW
+                    if(!isLeftCol) {
+                        neighs[game_grid[bottom_delta-1]]++;
+                    }
+                    // S
+                    neighs[game_grid[bottom_delta]]++;
+                    // SE
+                    if(!isRightCol) {
+                        neighs[game_grid[bottom_delta+1]]++; 
+                    }
+
+                }
                 // W
-                if(!isLeftEdge && instance._game_grid[c-1]) {
-                    num_alive_neighs++; 
+                if(!isLeftCol){
+                    neighs[game_grid[cell-1]]++;
                 } 
                 // E
-                if(!isRightEdge && instance._game_grid[c+1]) {
-                    num_alive_neighs++; 
-                } 
+                if(!isRightCol) {
+                    neighs[game_grid[cell+1]]++;
+                }  
+                /*
+                //NW 
+                if(!isTopRow && !isLeftCol) { //} && _game_grid[c-grid_length-1]!=0) { 
+                    neighs[game_grid[cell-cols-1]]++;
+                }
+                //N
+                if(!isTopRow) { //} && _game_grid[c-grid_length-1]!=0) { 
+                    neighs[game_grid[cell-cols]]++;
+                }
+                //NE
+                if(!isTopRow && !isRightCol) { //} && _game_grid[c-grid_length-1]!=0) { 
+                    neighs[game_grid[cell-cols+1]]++;
+                }
                 // SW
-                if(!isBottomRow && !isLeftEdge  && instance._game_grid[c+instance.grid_length-1]) {
-                    num_alive_neighs++; 
+                if(!isBottomRow && !isLeftCol) {
+                    neighs[game_grid[cell+cols-1]]++;
                 }
                 // S
-                if(!isBottomRow && instance._game_grid[c+instance.grid_length]) {
-                    num_alive_neighs++; 
+                if(!isBottomRow) {
+                    neighs[game_grid[cell+cols]]++;
                 }
                 // SE
-                if(!isBottomRow && !isRightEdge && instance._game_grid[c+instance.grid_length+1]) {
-                    num_alive_neighs++; 
-                }   
-                if (instance._game_grid[c]) { 
-                    if (num_alive_neighs == 2 || num_alive_neighs == 3) { 
-                        _res_game_grid[c] = true;
-                    } else { 
-                        _res_game_grid[c] = false;
+                if(!isBottomRow && !isRightCol) {
+                    neighs[game_grid[cell+cols+1]]++;
+                }
+                */
+                
+                //console.log("Cell ", cell); //, " has " , neighs[1],  " white neighs and ");//, neighs[2], " black neighs");
+                //console.log("\t wNei", neighs[1], "  bNeigh ", neighs[2]);
+                if(game_grid[cell]==0) { //EMPTY
+                    if(neighs[1] == 3) { //If has 3 wNei
+                        if(neighs[2] == 3) { //AND 3 bNei
+                            //choose randomly
+                        } else {            //if bNei != 3
+                            _res_game_grid[cell] = 1;
+                        }
+                    } else if (neighs[2] == 3) { // if bNei is 3
+                        _res_game_grid[cell] = 2; 
                     }
-                } else {
-                    if (num_alive_neighs == 3) { 
-                        _res_game_grid[c] = true;
-                    } else { 
-                        _res_game_grid[c] = false;
+                } else  {  
+                    if(neighs[2] > neighs[1]) {
+                        diff = neighs[2] - neighs[1];
+                    } else {
+                        diff = neighs[1] - neighs[2]; 
+                    }
+                    
+                    if (game_grid[cell]==1) { //WHITE 
+                        if(diff == 1 && neighs[1] == 1) {
+                            _res_game_grid[cell] = 0;  
+                        }
+                        else if(diff != 2 && diff != 3) {
+                            _res_game_grid[cell] = 0; 
+                        }
+                    } else {        
+                        if(diff == 1 && neighs[2] == 1) {
+                            _res_game_grid[cell] = 0;  
+                        }
+                        else if(diff != 2 && diff != 3) {
+                            _res_game_grid[cell] = 0; 
+                        }           //BLACK 
                     }
                 }
-                unchecked { c += 1; }  
-            }  
-            unchecked { i += 1; }
-            _game_grid =  copyArray(_res_game_grid);
-        }
-        instance.winner = msg.sender;
-        return _game_grid;
+                unchecked{cell++;} 
+            }
+            unchecked{i++;}
+            //if(i<game.iterations-1) {
+            game_grid =  copyArray(_res_game_grid);
+            //}
+        } 
+        //return _res_game_grid; 
     } 
-*/
+
 
     modifier gameExists(uint _gid) {
         require(_gid < game_count, "_gid game not yet created");
@@ -154,15 +266,26 @@ contract GCOL2P {
     }
  
     function joinGame(uint _gid) gameExists(_gid) public {
-        require(game_instances[_gid].state == State.WAITING, "game must be in WAITING");
-        require(game_instances[_gid].player1 !=  msg.sender, "owner cant join his own game");
+        require(game_instances[_gid].state == State.WAITING, "game must be in WAITING state");
+        require(game_instances[_gid].player1 !=  msg.sender, "player1 cant join his own game");
         game_instances[_gid].state = State.ONGOING;
         game_instances[_gid].player2 = msg.sender; 
-
         player_games[msg.sender].push(_gid);
+    }
 
+    function executeGame(uint _gid) gameExists(_gid) public {//returns(uint8[] memory) {
+        require(game_instances[_gid].state == State.ONGOING, "game must be in ONGOING state");
+        require(game_instances[_gid].end_block <= block.number, "need to reach end_block");
+        runIterations(_gid);
+        game_instances[_gid].state = State.FINISHED; 
+
+        //return 
     }
  
+    function getGamePlayers(uint _gid) gameExists(_gid) public view returns(address[2] memory) {
+       // require(_gid < game_count, "_gid game not yet created");
+        return  [game_instances[_gid].player1, game_instances[_gid].player2];//game_instances[_gid].game_grid;
+    }
     function getGameGrid(uint _gid) gameExists(_gid) public view returns(uint8[] memory) {
        // require(_gid < game_count, "_gid game not yet created");
         return  game_instances[_gid].game_grid;
@@ -173,13 +296,13 @@ contract GCOL2P {
     function getGridLength(uint _gid) gameExists(_gid) public view returns(uint256) {
         return game_instances[_gid].grid_length;
     }
-    function getGameCount() public view returns (uint256) {
-        return game_count;
-    }
     function getGameState(uint _gid) gameExists(_gid) public view returns(State) {
         return game_instances[_gid].state;
     }
     function getPlayerGames(address _addr) public view returns (uint[] memory) {
         return player_games[_addr];
+    }
+    function getGameCount() public view returns (uint256) {
+        return game_count;
     }
 }

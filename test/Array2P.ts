@@ -19,7 +19,9 @@ import { keccak256, stripZeros } from "ethers/lib/utils";
 //import { IERC20 } from "../typechain";
 import BigNumber from 'bignumber.js';
 import { Signer, BigNumberish } from "ethers";
-import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P } from "../utils/patterns";
+import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P } from "../utils/patterns";
+
+import { moveBlocks } from "../utils/move_blocks";
 
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
@@ -85,7 +87,7 @@ describe("Array2P", function () {
         await expect(cGoL.getEndBlock(1)).revertedWith("_gid game not yet created"); 
 
         await cGoL.connect(susan).setGameArray2P(2, 2, SOME_SEED_2P, duration, 5); 
-        await cGoL.connect(susan).setGameArray2P(2, 2, SOME_SEED_2P, duration, 50);
+        await cGoL.connect(susan).setGameArray2P(4, 8, CUBE_SEED_2P, duration, 50);
         
         expect((await cGoL.getPlayerGames(susan.address)).toString()).to.equal("1,2");  
         expect(Number(await cGoL.getGameCount())).to.equal(3); 
@@ -97,10 +99,35 @@ describe("Array2P", function () {
         expect((await cGoL.getPlayerGames(owner.address)).toString()).to.equal("0");  
         
         expect(await cGoL.getGameState(2)).to.equal(0);
+        expect((await cGoL.getGamePlayers(2))[1]).to.equal(susan.address);
         cGoL.joinGame(2);
-        expect(await cGoL.getGameState(2)).to.equal(1);
-        expect((await cGoL.getPlayerGames(owner.address)).toString()).to.equal("0,2");  
         
+        expect(await cGoL.getGameState(2)).to.equal(1);
+        expect((await cGoL.getGamePlayers(2))[1]).to.equal(owner.address);
+        expect((await cGoL.getPlayerGames(owner.address)).toString()).to.equal("0,2");  
+
+
+        await expect(cGoL.connect(bob).joinGame(2)).revertedWith("game must be in WAITING state");
+        
+    })
+
+    it("Should execute the game", async function () {
+        //as per previous test, game 2 is in ONGOING state 
+ 
+        await cGoL.setGameArray2P(4, 8, CUBE_SEED_2P, 10, 1); 
+        console.log(`hmmm.... ${await cGoL.getGameState(3)}`);
+        await expect(cGoL.executeGame(3)).revertedWith("game must be in ONGOING state");
+        await cGoL.connect(susan).joinGame(3);  
+        await expect(cGoL.executeGame(3)).revertedWith("need to reach end_block");   
+        await moveBlocks(1); 
+        await expect(cGoL.executeGame(3)).revertedWith("need to reach end_block");  
+        await moveBlocks(10);  
+        let res = await cGoL.callStatic.executeGame(3); 
+        console.log(`hmmm.... ${await cGoL.getGameState(3)}`);
+        //expect(await cGoL.getGameState(3)).to.equal(2);
+        
+        await expect(cGoL.joinGame(3)).revertedWith("game must be in WAITING state");
+    
         /*
         await cGoL.setGameArrayBasic(duration, CUBE_SEED, Math.sqrt(CUBE_SEED.length));  
         let res = await cGoL.callStatic.runGameArrayBasic(); 
