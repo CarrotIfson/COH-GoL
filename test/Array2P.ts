@@ -68,24 +68,39 @@ describe("Array2P", function () {
     it("Should deploy and set the game 2P", async function () {
         [owner, susan, bob, carl] = await ethers.getSigners();
         const CGoL = await ethers.getContractFactory("GCOL2P", owner);
-
-
-        let block = await ethers.provider.getBlockNumber();
         cGoL = await CGoL.deploy();
         console.log(`\tDeployed CGoL contract at ${cGoL.address}`);
 
- 
         await expect(cGoL.setGameArray2P(2, 4, SOME_SEED_2P, duration, 10)).revertedWith("_rows and _cols dont match _seed");
         await cGoL.setGameArray2P(2, 2, SOME_SEED_2P, duration, 10); 
         const endBlock = await ethers.provider.getBlockNumber() + duration;
 
-        const game_grid = await cGoL.getGameGrid(0);
-        expect(Number(await cGoL.getEndBlock(0))).to.equal(endBlock); 
+        let game_grid = await cGoL.getGameGrid(0);
+        expect(Number(await cGoL.getEndBlock(0))).to.equal(endBlock);  
+        expect(game_grid.length).to.equal(SOME_SEED_2P.length); 
+        expect(Number(await cGoL.getGameCount())).to.equal(1); 
+
+        await expect(cGoL.getGameGrid(1)).revertedWith("_gid game not yet created"); 
+        await expect(cGoL.getGridLength(1)).revertedWith("_gid game not yet created"); 
+        await expect(cGoL.getEndBlock(1)).revertedWith("_gid game not yet created"); 
+
+        await cGoL.connect(susan).setGameArray2P(2, 2, SOME_SEED_2P, duration, 5); 
+        await cGoL.connect(susan).setGameArray2P(2, 2, SOME_SEED_2P, duration, 50);
         
-        expect(await cGoL.getGridLength(0)).to.equal(SOME_SEED_2P.length);
+        expect((await cGoL.getPlayerGames(susan.address)).toString()).to.equal("1,2");  
+        expect(Number(await cGoL.getGameCount())).to.equal(3); 
     })
 
-    it("Should play the game", async function () {
+    it("Should join the game", async function () {
+        await expect(cGoL.joinGame(5)).revertedWith("_gid game not yet created");
+        await expect(cGoL.joinGame(0)).revertedWith("player1 cant join his own game");  
+        expect((await cGoL.getPlayerGames(owner.address)).toString()).to.equal("0");  
+        
+        expect(await cGoL.getGameState(2)).to.equal(0);
+        cGoL.joinGame(2);
+        expect(await cGoL.getGameState(2)).to.equal(1);
+        expect((await cGoL.getPlayerGames(owner.address)).toString()).to.equal("0,2");  
+        
         /*
         await cGoL.setGameArrayBasic(duration, CUBE_SEED, Math.sqrt(CUBE_SEED.length));  
         let res = await cGoL.callStatic.runGameArrayBasic(); 

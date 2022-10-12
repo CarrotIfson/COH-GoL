@@ -33,7 +33,6 @@ contract GCOL2P {
     mapping(uint256 => Game) game_instances;
     mapping(address => uint256[]) player_games; 
     uint256 game_count; 
-    
 
     function setGameArray2P(uint8 _rows, uint8 _cols, uint8[] memory _seed, uint8 _duration, uint8 _iterations) public {
         require(_rows*_cols == _seed.length, "_rows and _cols dont match _seed");
@@ -68,15 +67,16 @@ contract GCOL2P {
         } 
         return res; 
     }
+
 /*
     function runGameArrayBasic() public returns(bool[] memory _game_grid) {  
-        /*
-            r   r    r
-        c   NW  N   NE
-        c   W  CELL  E
-        c   SW  S   SE
-        */
-/* 
+        
+        //      r   r    r
+        //  c   NW  N   NE
+        //  c   W  CELL  E
+        //  c   SW  S   SE
+        
+
         _game_grid = game_grid;
         bool[] memory _res_game_grid = copyArray(_game_grid);
         uint8 num_alive_neighs;
@@ -147,20 +147,38 @@ contract GCOL2P {
         return _game_grid;
     } 
 */
-    function getGameGrid(uint _gid) public view returns(uint8[] memory) {
+
+    modifier gameExists(uint _gid) {
+        require(_gid < game_count, "_gid game not yet created");
+        _;
+    }
+ 
+    function joinGame(uint _gid) gameExists(_gid) public {
+        require(game_instances[_gid].state == State.WAITING, "game must be in WAITING");
+        require(game_instances[_gid].player1 !=  msg.sender, "owner cant join his own game");
+        game_instances[_gid].state = State.ONGOING;
+        game_instances[_gid].player2 = msg.sender; 
+
+        player_games[msg.sender].push(_gid);
+
+    }
+ 
+    function getGameGrid(uint _gid) gameExists(_gid) public view returns(uint8[] memory) {
+       // require(_gid < game_count, "_gid game not yet created");
         return  game_instances[_gid].game_grid;
     }
-    function getEndBlock(uint _gid) public view returns(uint256) {
+    function getEndBlock(uint _gid) gameExists(_gid)  public view returns(uint256) {
         return  game_instances[_gid].end_block;
     }
-    function getGridLength(uint _gid) public view returns(uint256) {
+    function getGridLength(uint _gid) gameExists(_gid) public view returns(uint256) {
         return game_instances[_gid].grid_length;
     }
-
     function getGameCount() public view returns (uint256) {
         return game_count;
     }
-
+    function getGameState(uint _gid) gameExists(_gid) public view returns(State) {
+        return game_instances[_gid].state;
+    }
     function getPlayerGames(address _addr) public view returns (uint[] memory) {
         return player_games[_addr];
     }
