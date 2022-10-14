@@ -40,7 +40,11 @@ module.exports = {
     cantomain: {
       url: "https://jsonrpc.canto.nodestake.top/",
       chainId: 7700,
-      accounts: [process.env.PRIV_KEY],  
+      //accounts: [process.env.PRIV_KEY],  
+      accounts: {
+        mnemonic: process.env.MNEMONIC,
+        count: 10
+      },
     },
     bsctest: {
       url: "https://data-seed-prebsc-2-s2.binance.org:8545",

@@ -14,7 +14,7 @@ contract GCOL2P {
         grid_size = _seed.length;
     }
     */
-    enum State { WAITING, ONGOING, FINISHED}
+    enum State { FRESH, WAITING, FINISHED}
     struct Game {
         uint8 rows;
         uint8 cols;
@@ -60,7 +60,7 @@ contract GCOL2P {
             block.number,
             block.number + _duration,
             _iterations,
-            State.WAITING,
+            State.FRESH,
             address(0)
         );
         player_games[msg.sender].push(game_count);
@@ -78,7 +78,7 @@ contract GCOL2P {
     }
 
 
-    function runIterations(uint _gid) private { //returns(uint8[] memory) {  
+    function runIterations(uint _gid) private view returns(uint8[] memory){ //returns(uint8[] memory) {  
         
         //      c   c    c
         //  r   NW  N   NE
@@ -99,9 +99,9 @@ contract GCOL2P {
         uint8[] memory neighs = new uint8[](3);
  
         uint8 cell; 
-        uint8 cols = game.cols; 
-        uint8 rows = game.rows;
-        uint8 bottom_delimiter = (rows-1)*cols;
+        //uint8 cols = game.cols; 
+        //uint8 rows = game.rows;
+        uint8 bottom_delimiter = (game.rows-1)*game.cols;
     
         uint8 top_delta;
         uint8 bottom_delta;
@@ -109,8 +109,7 @@ contract GCOL2P {
         uint8 diff;
     
  
-        for(uint i=0; i<game.iterations; ) {
-            console.log("Iteration: ", i);
+        for(uint i=0; i<game.iterations; ) { 
             /*for(r = 0; r < rows; ) {
                 if(r )
                 console.log("\tRow: ", r);
@@ -133,8 +132,8 @@ contract GCOL2P {
                 isTopRow = cell < cols;
                 isBottomRow = cell >= bottom_delimiter;
                 */
-                isLeftCol = cell % cols == 0; 
-                isRightCol = (cell+1) % cols == 0;
+                isLeftCol = cell % game.cols == 0; 
+                isRightCol = (cell+1) % game.cols == 0;
 
                 /*
                 if(isTopRow) {
@@ -150,8 +149,8 @@ contract GCOL2P {
                     console.log("In right col, cell", cell);
                 }*/
                 
-                if(cell >= cols) { //!isTopRow
-                    top_delta = cell-cols;
+                if(cell >= game.cols) { //!isTopRow
+                    top_delta = cell-game.cols;
                     // SW
                     if(!isLeftCol) {
                         neighs[game_grid[top_delta-1]]++;
@@ -166,7 +165,7 @@ contract GCOL2P {
                 }
                 
                 if(cell < bottom_delimiter) { //!isBottomRow
-                    bottom_delta = cell+cols;
+                    bottom_delta = cell+game.cols;
                     // SW
                     if(!isLeftCol) {
                         neighs[game_grid[bottom_delta-1]]++;
@@ -220,7 +219,7 @@ contract GCOL2P {
                     if(neighs[1] == 3) { //If has 3 wNei
                         if(neighs[2] == 3) { //AND 3 bNei
                             //choose randomly
-                        } else {            //if bNei != 3
+                        } else {            //if bNei != 3 
                             _res_game_grid[cell] = 1;
                         }
                     } else if (neighs[2] == 3) { // if bNei is 3
@@ -252,11 +251,12 @@ contract GCOL2P {
                 unchecked{cell++;} 
             }
             unchecked{i++;}
-            //if(i<game.iterations-1) {
-            game_grid =  copyArray(_res_game_grid);
+            //if(i<game.iterations-1) { 
+            game_grid = copyArray(_res_game_grid);
             //}
         } 
-        //return _res_game_grid; 
+        //game_instances[_gid].game_grid = game_grid;
+        return _res_game_grid; 
     } 
 
 
@@ -266,19 +266,23 @@ contract GCOL2P {
     }
  
     function joinGame(uint _gid) gameExists(_gid) public {
-        require(game_instances[_gid].state == State.WAITING, "game must be in WAITING state");
+        require(game_instances[_gid].state == State.FRESH, "game must be in FRESH state");
         require(game_instances[_gid].player1 !=  msg.sender, "player1 cant join his own game");
-        game_instances[_gid].state = State.ONGOING;
+        
+        game_instances[_gid].state = State.WAITING;
         game_instances[_gid].player2 = msg.sender; 
         player_games[msg.sender].push(_gid);
+        
     }
 
     function executeGame(uint _gid) gameExists(_gid) public {//returns(uint8[] memory) {
-        require(game_instances[_gid].state == State.ONGOING, "game must be in ONGOING state");
+        require(game_instances[_gid].state == State.WAITING, "game must be in WAITING state");
         require(game_instances[_gid].end_block <= block.number, "need to reach end_block");
-        runIterations(_gid);
-        game_instances[_gid].state = State.FINISHED; 
-
+        game_instances[_gid].game_grid = runIterations(_gid);
+        game_instances[_gid].state = State.FINISHED;   //TODO WHY IS THIS NOT UPDATING 
+        
+        
+        
         //return 
     }
  

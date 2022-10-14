@@ -19,7 +19,7 @@ import { keccak256, stripZeros } from "ethers/lib/utils";
 //import { IERC20 } from "../typechain";
 import BigNumber from 'bignumber.js';
 import { Signer, BigNumberish } from "ethers";
-import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P } from "../utils/patterns";
+import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P, BLINKER_SEED_2P, BLINKER_ODD_2P, HUNDRED_SEED_2P, HUNDRED_END_2P, HUNDRED_WEND_2P, HUNDRED_BSEED_2P, HUNDRED_WSEED_2P, HUNDRED_BEND_2P, PUFFER_WSEED_2P, PUFFER_BSEED_2P } from "../utils/patterns";
 
 import { moveBlocks } from "../utils/move_blocks";
 
@@ -45,11 +45,10 @@ function arraysEqual(a: Array, b: Array) {
     return true;
 }
 
-function logRectMatrix(m: Array) {
-    const r = Math.sqrt(m.length) * 2;
+function logRectMatrix(rows:number, cols: number, m: Array) {
     console.log("-------------------");
-    for (let i = 0; i < r; i++) {
-        console.log(m.slice(i * r, i * r + r).toString());
+    for (let i = 0; i < rows; i++) {
+        console.log(m.slice(i * cols, i * cols + cols).toString());
     }
     console.log("-------------------");
 }
@@ -107,27 +106,71 @@ describe("Array2P", function () {
         expect((await cGoL.getPlayerGames(owner.address)).toString()).to.equal("0,2");  
 
 
-        await expect(cGoL.connect(bob).joinGame(2)).revertedWith("game must be in WAITING state");
+        await expect(cGoL.connect(bob).joinGame(2)).revertedWith("game must be in FRESH state");
         
     })
 
     it("Should execute the game", async function () {
         //as per previous test, game 2 is in ONGOING state 
- 
-        await cGoL.setGameArray2P(4, 8, CUBE_SEED_2P, 10, 1); 
-        console.log(`hmmm.... ${await cGoL.getGameState(3)}`);
-        await expect(cGoL.executeGame(3)).revertedWith("game must be in ONGOING state");
+         
+        await cGoL.setGameArray2P(4, 8, CUBE_SEED_2P, 10, 1);  
+        await expect(cGoL.executeGame(3)).revertedWith("game must be in WAITING state");
         await cGoL.connect(susan).joinGame(3);  
         await expect(cGoL.executeGame(3)).revertedWith("need to reach end_block");   
         await moveBlocks(1); 
         await expect(cGoL.executeGame(3)).revertedWith("need to reach end_block");  
         await moveBlocks(10);  
-        let res = await cGoL.callStatic.executeGame(3); 
-        console.log(`hmmm.... ${await cGoL.getGameState(3)}`);
+        await cGoL.executeGame(3);  
         //expect(await cGoL.getGameState(3)).to.equal(2);
         
-        await expect(cGoL.joinGame(3)).revertedWith("game must be in WAITING state");
+        await expect(cGoL.executeGame(3)).revertedWith("game must be in WAITING state");
+        await expect(cGoL.connect(susan).joinGame(3)).revertedWith("game must be in FRESH state");
     
+        let res = await cGoL.getGameGrid(3);  
+        expect(arraysEqual(res, CUBE_SEED_2P)).to.equal(true);
+        
+
+        await cGoL.setGameArray2P(4, 8, BLINKER_SEED_2P, 10, 8); 
+        await cGoL.connect(susan).joinGame(4); 
+        await moveBlocks(10);  
+        await cGoL.executeGame(4);   
+        res = await cGoL.getGameGrid(4);  
+        expect(arraysEqual(res, BLINKER_SEED_2P)).to.equal(true);
+
+        await cGoL.setGameArray2P(4, 8, BLINKER_SEED_2P, 10, 11); 
+        await cGoL.connect(susan).joinGame(5); 
+        await moveBlocks(10);  
+        await cGoL.executeGame(5);   
+        res = await cGoL.getGameGrid(5);   
+        expect(arraysEqual(res, BLINKER_ODD_2P)).to.equal(true);
+
+
+        await cGoL.setGameArray2P(10, 10, HUNDRED_WSEED_2P, 10, 8); 
+        await cGoL.connect(susan).joinGame(6); 
+        await moveBlocks(10);  
+        await cGoL.executeGame(6);   
+        res = await cGoL.getGameGrid(6);   
+        //logRectMatrix(10,10,HUNDRED_SEED_2P); 
+        //logRectMatrix(10,10,res);
+        expect(arraysEqual(res, HUNDRED_WEND_2P)).to.equal(true);
+
+        await cGoL.setGameArray2P(10, 10, HUNDRED_BSEED_2P, 10, 8); 
+        await cGoL.connect(susan).joinGame(7); 
+        await moveBlocks(10);  
+        await cGoL.executeGame(7);   
+        res = await cGoL.getGameGrid(7);   
+        //logRectMatrix(10,10,HUNDRED_SEED_2P); 
+        //logRectMatrix(10,10,res);
+        expect(arraysEqual(res, HUNDRED_BEND_2P)).to.equal(true);
+
+
+
+        await cGoL.setGameArray2P(19, 13, PUFFER_BSEED_2P, 1, 9); 
+        await cGoL.connect(susan).joinGame(8); 
+        await moveBlocks(15);  
+        await cGoL.executeGame(8);   
+        res = await cGoL.getGameGrid(8);  
+ 
         /*
         await cGoL.setGameArrayBasic(duration, CUBE_SEED, Math.sqrt(CUBE_SEED.length));  
         let res = await cGoL.callStatic.runGameArrayBasic(); 

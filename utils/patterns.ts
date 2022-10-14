@@ -133,9 +133,142 @@ export const CUBE_SEED_2P = [E, E, E, E, E, E, E, E, //7
 export const BLINKER_SEED_2P = [E, W, E, E, E, E, E, E,
                                 E, W, E, E, E, B, B, B,
                                 E, W, E, E, E, E, E, E,
-                                E, E, E, E, E, E, E, E]
+                                E, E, E, E, E, E, E, E] //even
 
 export const BLINKER_ODD_2P =  [E, E, E, E, E, E, B, E,
                                 W, W, W, E, E, E, B, E,
                                 E, E, E, E, E, E, B, E,
-                                E, E, E, E, E, E, E, E]
+                                E, E, E, E, E, E, E, E] //odd
+
+ 
+
+
+export const HUNDRED_WSEED_2P = [E, W, E, E, E, E, E, E, W, E,
+                                 E, E, W, E, E, E, E, E, W, E,
+                                 W, W, W, E, E, E, E, E, W, E,
+                                 E, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E, //5
+                                 W, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E,
+                                 W, W, E, E, E, E, W, E, E, E,
+                                 W, W, E, E, W, W, E, E, E, E]
+ 
+export const HUNDRED_WEND_2P = [E, E, E, E, E, E, E, E, W, E,
+                                E, E, E, E, E, E, E, E, W, E,
+                                E, E, E, W, E, E, E, E, W, E,
+                                E, E, E, E, W, E, E, E, E, E,
+                                E, E, W, W, W, E, E, E, E, E, //5
+                                E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, E,
+                                W, W, E, E, E, E, E, E, E, E,
+                                W, W, E, E, E, E, E, E, E, E] //p=8
+                            
+
+export const HUNDRED_BSEED_2P = [E, B, E, E, E, E, E, E, B, E,
+                                 E, E, B, E, E, E, E, E, B, E,
+                                 B, B, B, E, E, E, E, E, B, E,
+                                 E, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E, //5
+                                 B, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E,
+                                 B, B, E, E, E, E, B, E, E, E,
+                                 B, B, E, E, B, B, E, E, E, E]
+                            
+export const HUNDRED_BEND_2P = [E, E, E, E, E, E, E, E, B, E,
+                                E, E, E, E, E, E, E, E, B, E,
+                                E, E, E, B, E, E, E, E, B, E,
+                                E, E, E, E, B, E, E, E, E, E,
+                                E, E, B, B, B, E, E, E, E, E, //5
+                                E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, E,
+                                B, B, E, E, E, E, E, E, E, E,
+                                B, B, E, E, E, E, E, E, E, E] //p=8
+
+
+export const PUFFER_BSEED_2P = [E, E, E, E, E, E, E, B, E, E, E, E, E,
+                                E, E, E, E, E, B, E, E, E, B, E, E, E,
+                                E, E, E, E, B, E, E, E, E, E, E, E, E,
+                                E, E, E, E, B, E, E, E, E, B, E, E, E,
+                                E, E, E, E, B, B, B, B, B, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, B, B, E, E, E, E, E, E,
+                                E, E, E, E, B, B, E, B, B, B, E, E, E,
+                                E, E, E, E, E, B, B, B, B, E, E, E, E,
+                                E, E, E, E, E, E, B, B, E, E, E, E, E, //E
+                                E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                E, E, E, E, E, E, E, E, E, B, B, E, E, //5
+                                E, E, E, E, E, E, E, B, E, E, E, E, B,
+                                E, E, E, E, E, E, B, E, E, E, E, E, E,
+                                E, E, E, E, E, E, B, E, E, E, E, E, B,
+                                E, E, E, E, E, E, B, B, B, B, B, B, E,
+                                E, E, E, E, E, E, E, E, E, E, E, E, E] //19x12
+
+// ABANDON ALL HOPE ALL YE WHO ENTER
+
+
+export const TWENTYTEN_RECT_2P = [ E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                   E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                   E, E, E, B, E, E, E, E, B, E, E, E, E, B, E, E, E, E, B, E,
+                                   E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E,
+                                   E, E, B, B, B, E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, //5//5
+                                   E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                   E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                   E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                   B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E,
+                                   B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E] //p=8
+
+
+export const FIFTEEN_SQUARE_2P = [E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                  E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                  E, E, E, B, E, E, E, E, B, E, E, E, E, B, E,
+                                  E, E, E, E, E, E, E, E, E, B, E, E, E, E, E,
+                                  E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, //5//5
+                                  E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                  E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                  E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                  E, E, E, E, E, B, B, E, E, E, E, E, E, E, E,
+                                  E, E, E, E, E, B, B, E, E, E, E, E, E, E, E,
+                                  E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                  E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                  E, E, E, B, E, E, E, E, B, E, E, E, E, B, E,
+                                  E, E, E, E, E, E, E, E, E, B, E, E, E, E, E,
+                                  E, E, E, E, E, E, E, B, B, B, E, E, E, E, E] //p=8
+
+export const THIRTY_SQUARE_2P = [E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, W, E, E, E, E, E, E, E, E, B, E,
+                                 E, E, E, E, E, E, E, E, B, E, E, E, W, W, W, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                 E, E, E, B, E, E, E, E, B, E, E, E, E, B, E, E, E, E, B, E, E, E, E, B, E, E, E, E, B, E,
+                                 E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E,
+                                 E, E, B, B, B, E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, //5
+                                 E, E, E, E, E, E, E, E, E, W, W, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, W, W, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E,
+                                 B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E,
+                                 B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                 E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                 E, E, E, B, E, E, E, E, B, E, E, E, E, B, E, E, E, E, B, E, E, E, E, B, E, E, E, E, B, E,
+                                 E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E,
+                                 E, E, B, B, B, E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, //5
+                                 E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, W, E, E, E, E, E, E, E, E, W, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, W, E, E, E, E, E, E, E, E, E, W, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, W, E, E, E, E, E, E, E, E, E, W, E, E, E, E,
+                                 B, B, E, E, W, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E, B, B, E, W, W, E, E, E, E, E,
+                                 B, B, E, E, E, W, E, E, E, E, B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E,
+                                 E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,
+                                 E, E, E, E, E, E, W, E, B, E, E, E, E, E, E, E, E, W, B, E, E, E, E, E, E, E, E, E, B, E,
+                                 E, E, E, B, E, E, W, E, B, E, E, E, E, B, E, E, W, E, B, E, E, E, E, B, E, E, E, E, B, E,
+                                 E, E, E, E, B, E, W, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E, E, E, E, E,
+                                 E, E, B, B, B, E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, E, E, B, B, B, E, E, E, E, E, //5
+                                 E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, W, E,
+                                 E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, W, W, E, E, E, E, E, E, E, E, E, E, W, E,
+                                 E, E, E, W, E, E, E, E, E, E, E, E, E, E, E, E, W, W, E, E, E, E, E, E, E, E, E, E, W, E,
+                                 B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E,
+                                 B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E, B, B, E, E, E, E, E, E, E, E] //p=8
+
+ 
