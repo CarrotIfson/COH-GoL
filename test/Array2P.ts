@@ -19,7 +19,7 @@ import { keccak256, stripZeros } from "ethers/lib/utils";
 //import { IERC20 } from "../typechain";
 import BigNumber from 'bignumber.js';
 import { Signer, BigNumberish } from "ethers";
-import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P, BLINKER_SEED_2P, BLINKER_ODD_2P, HUNDRED_SEED_2P, HUNDRED_END_2P, HUNDRED_WEND_2P, HUNDRED_BSEED_2P, HUNDRED_WSEED_2P, HUNDRED_BEND_2P, PUFFER_WSEED_2P, PUFFER_BSEED_2P } from "../utils/patterns";
+import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P, BLINKER_SEED_2P, BLINKER_ODD_2P, HUNDRED_SEED_2P, HUNDRED_END_2P, HUNDRED_WEND_2P, HUNDRED_BSEED_2P, HUNDRED_WSEED_2P, HUNDRED_BEND_2P, PUFFER_WSEED_2P, PUFFER_BSEED_2P, COLLISION_SEED_2P, COLLISION_WWIN_2P, COLLISION_WEND_2P, COLLISION_BEND_2P } from "../utils/patterns";
 
 import { moveBlocks } from "../utils/move_blocks";
 
@@ -90,6 +90,8 @@ describe("Array2P", function () {
         
         expect((await cGoL.getPlayerGames(susan.address)).toString()).to.equal("1,2");  
         expect(Number(await cGoL.getGameCount())).to.equal(3); 
+ 
+
     })
 
     it("Should join the game", async function () {
@@ -112,7 +114,7 @@ describe("Array2P", function () {
 
     it("Should execute the game", async function () {
         //as per previous test, game 2 is in ONGOING state 
-         
+          
         await cGoL.setGameArray2P(4, 8, CUBE_SEED_2P, 10, 1);  
         await expect(cGoL.executeGame(3)).revertedWith("game must be in WAITING state");
         await cGoL.connect(susan).joinGame(3);  
@@ -163,45 +165,38 @@ describe("Array2P", function () {
         //logRectMatrix(10,10,res);
         expect(arraysEqual(res, HUNDRED_BEND_2P)).to.equal(true);
 
-
-
         await cGoL.setGameArray2P(19, 13, PUFFER_BSEED_2P, 1, 9); 
         await cGoL.connect(susan).joinGame(8); 
         await moveBlocks(15);  
         await cGoL.executeGame(8);   
-        res = await cGoL.getGameGrid(8);  
- 
-        /*
-        await cGoL.setGameArrayBasic(duration, CUBE_SEED, Math.sqrt(CUBE_SEED.length));  
-        let res = await cGoL.callStatic.runGameArrayBasic(); 
 
-        expect(arraysEqual(res, CUBE_SEED)).to.equal(true);
-        await cGoL.setGameArrayBasic(3, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
-        res = await cGoL.callStatic.runGameArrayBasic();  
-
-        expect(arraysEqual(res, BLINKER_SEED)).to.equal(false);
-        await cGoL.setGameArrayBasic(8, BLINKER_SEED, Math.sqrt(BLINKER_SEED.length));
-        res = await cGoL.callStatic.runGameArrayBasic();  
-        expect(arraysEqual(res, BLINKER_SEED)).to.equal(true);  
-
-        await cGoL.setGameArrayBasic(1, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
-        res = await cGoL.callStatic.runGameArrayBasic();   
-        expect(arraysEqual(res, BEACON_SEED)).to.equal(false);
-        await cGoL.setGameArrayBasic(6, BEACON_SEED, Math.sqrt(BEACON_SEED.length));
-        res = await cGoL.callStatic.runGameArrayBasic();  
-        expect(arraysEqual(res, BEACON_SEED)).to.equal(true); 
-        await cGoL.setGameArrayBasic(1, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
-        res = await cGoL.callStatic.runGameArrayBasic();   
-        expect(arraysEqual(res, GLIDER_END)).to.equal(false);
         
-        await cGoL.setGameArrayBasic(4, GLIDER_SEED, Math.sqrt(GLIDER_SEED.length));
-        res = await cGoL.callStatic.runGameArrayBasic();  
-        expect(arraysEqual(res, GLIDER_END)).to.equal(true); 
+        await cGoL.setGameArray2P(3, 5, COLLISION_SEED_2P, 1, 1); 
+        await cGoL.connect(susan).joinGame(9); 
+        await moveBlocks(15);  
+        await cGoL.setRandomizer(9); 
+        await cGoL.executeGame(9);   
+        res = await cGoL.getGameGrid(9);  
+        expect(arraysEqual(res, COLLISION_WWIN_2P)).to.equal(true);
 
 
-        await cGoL.setGameArrayBasic(8, HUNDRED_SEED, Math.sqrt(HUNDRED_SEED.length));
-        res = await cGoL.callStatic.runGameArrayBasic();   
-        expect(arraysEqual(res, HUNDRED_END)).to.equal(true);   
-        */
+        await cGoL.setGameArray2P(3, 5, COLLISION_SEED_2P, 1, 10); 
+        await cGoL.connect(susan).joinGame(10); 
+        await moveBlocks(15);  
+        await cGoL.setRandomizer(10); 
+        await cGoL.executeGame(10);   
+        res = await cGoL.getGameGrid(10);  
+        expect(arraysEqual(res, COLLISION_WEND_2P)).to.equal(true);
+        
+ 
+        await cGoL.setGameArray2P(3, 5, COLLISION_SEED_2P, 1, 6); 
+        await cGoL.connect(susan).joinGame(11); 
+        await moveBlocks(15);  
+        await cGoL.setRandomizerBWin(11); 
+        await cGoL.executeGame(11);   
+        res = await cGoL.getGameGrid(11);  
+        expect(arraysEqual(res, COLLISION_BEND_2P)).to.equal(true);
+  
     })
+    
 })

@@ -209,7 +209,20 @@ export const PUFFER_BSEED_2P = [E, E, E, E, E, E, E, B, E, E, E, E, E,
                                 E, E, E, E, E, E, B, B, B, B, B, B, E,
                                 E, E, E, E, E, E, E, E, E, E, E, E, E] //19x12
 
-// ABANDON ALL HOPE ALL YE WHO ENTER
+export const COLLISION_SEED_2P = [E, W, E, B, E,
+                                  E, W, E, B, E,
+                                  E, W, E, B, E]    
+export const COLLISION_WWIN_2P = [E, E, E, E, E,
+                                  W, W, W, B, B,
+                                  E, E, E, E, E]    
+export const COLLISION_WEND_2P = [E, W, E, E, E,
+                                  E, W, E, E, E,
+                                  E, W, E, E, E]  
+export const COLLISION_BEND_2P = [E, E, E, B, E,
+                                  E, E, E, B, E,
+                                  E, E, E, B, E]                             
+//////////////////////////////////////////////////////////////////////////////////////////////
+// ABANDON ALL HOPE ALL YE WHO ENTER HERE
 
 
 export const TWENTYTEN_RECT_2P = [ E, E, E, E, E, E, E, E, B, E, E, E, E, E, E, E, E, E, B, E,

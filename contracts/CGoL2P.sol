@@ -28,6 +28,7 @@ contract GCOL2P {
         uint256 iterations;
         State state;
         address winner;
+        bytes32 randomizer;
     }
  
     mapping(uint256 => Game) private game_instances ;
@@ -61,7 +62,8 @@ contract GCOL2P {
             block.number + _duration,
             _iterations,
             State.FRESH,
-            address(0)
+            address(0),
+            bytes32(0)
         );
         player_games[msg.sender].push(game_count);
         game_count++;
@@ -219,6 +221,7 @@ contract GCOL2P {
                     if(neighs[1] == 3) { //If has 3 wNei
                         if(neighs[2] == 3) { //AND 3 bNei
                             //choose randomly
+                            _res_game_grid[cell] = uint8(game.randomizer[(i+cell)%32] & 0x01)+1;
                         } else {            //if bNei != 3 
                             _res_game_grid[cell] = 1;
                         }
@@ -271,8 +274,9 @@ contract GCOL2P {
         
         game_instances[_gid].state = State.WAITING;
         game_instances[_gid].player2 = msg.sender; 
+        game_instances[_gid].randomizer = keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
+        msg.sender)); 
         player_games[msg.sender].push(_gid);
-        
     }
 
     function executeGame(uint _gid) gameExists(_gid) public {//returns(uint8[] memory) {
@@ -284,6 +288,14 @@ contract GCOL2P {
         
         
         //return 
+    }
+
+    function pseudoRandom() public view returns(uint8) {
+        //return uint8(keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
+        //msg.sender))[2] & 0x01);
+        bytes32 b = keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
+        msg.sender)); 
+        return  uint8(b[0] & 0x01);
     }
  
     function getGamePlayers(uint _gid) gameExists(_gid) public view returns(address[2] memory) {
@@ -308,5 +320,14 @@ contract GCOL2P {
     }
     function getGameCount() public view returns (uint256) {
         return game_count;
+    }
+
+    //for testing purposes
+    function setRandomizer(uint _gid) public {
+        game_instances[_gid].randomizer = bytes32(0);
+    }
+    function setRandomizerBWin(uint _gid) public {
+        //game_instances[_gid].randomizer = bytes32('ffffffffffffffffffffffffffffffff');
+        game_instances[_gid].randomizer = bytes32('________________________________');//game_instances[_gid].randomizer;
     }
 }
