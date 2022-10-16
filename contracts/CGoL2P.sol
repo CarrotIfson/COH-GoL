@@ -16,8 +16,8 @@ contract GCOL2P {
     */
     enum State { FRESH, WAITING, FINISHED}
     struct Game {
-        uint8 rows;
-        uint8 cols;
+        uint256 rows;
+        uint256 cols;
         uint256 grid_length;
         uint8[] game_grid; 
         address player1;
@@ -46,7 +46,7 @@ contract GCOL2P {
         }
     }
 
-    function setGameArray2P(uint8 _rows, uint8 _cols, uint8[] calldata _seed, uint8 _duration, uint8 _iterations) public {
+    function setGameArray2P(uint256 _rows, uint256 _cols, uint8[] calldata _seed, uint256 _duration, uint256 _iterations) public {
         require(_rows*_cols == _seed.length, "_rows and _cols dont match _seed");
         check_grid(_seed);
         //require(_grid_length < 15, "Max row length is 15"); TODO eventually see which is the biggest array we can handle with 60M Gas
@@ -92,21 +92,21 @@ contract GCOL2P {
         uint8[] memory game_grid = game.game_grid;
         
         uint8[] memory _res_game_grid = copyArray(game_grid);
-        bool isTopRow;
-        bool isBottomRow;
+        //bool isTopRow;
+        //bool isBottomRow;
         bool isLeftCol;
         bool isRightCol;  
  
 
         uint8[] memory neighs = new uint8[](3);
  
-        uint8 cell; 
+        uint256 cell; 
         //uint8 cols = game.cols; 
         //uint8 rows = game.rows;
-        uint8 bottom_delimiter = (game.rows-1)*game.cols;
+        uint256 bottom_delimiter = (game.rows-1)*game.cols;
     
-        uint8 top_delta;
-        uint8 bottom_delta;
+        uint256 top_delta;
+        uint256 bottom_delta;
 
         uint8 diff;
     
@@ -214,9 +214,7 @@ contract GCOL2P {
                     neighs[game_grid[cell+cols+1]]++;
                 }
                 */
-                
-                //console.log("Cell ", cell); //, " has " , neighs[1],  " white neighs and ");//, neighs[2], " black neighs");
-                //console.log("\t wNei", neighs[1], "  bNeigh ", neighs[2]);
+                 
                 if(game_grid[cell]==0) { //EMPTY
                     if(neighs[1] == 3) { //If has 3 wNei
                         if(neighs[2] == 3) { //AND 3 bNei

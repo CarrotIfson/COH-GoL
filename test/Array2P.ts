@@ -19,7 +19,7 @@ import { keccak256, stripZeros } from "ethers/lib/utils";
 //import { IERC20 } from "../typechain";
 import BigNumber from 'bignumber.js';
 import { Signer, BigNumberish } from "ethers";
-import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P, BLINKER_SEED_2P, BLINKER_ODD_2P, HUNDRED_SEED_2P, HUNDRED_END_2P, HUNDRED_WEND_2P, HUNDRED_BSEED_2P, HUNDRED_WSEED_2P, HUNDRED_BEND_2P, PUFFER_WSEED_2P, PUFFER_BSEED_2P, COLLISION_SEED_2P, COLLISION_WWIN_2P, COLLISION_WEND_2P, COLLISION_BEND_2P } from "../utils/patterns";
+import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P, BLINKER_SEED_2P, BLINKER_ODD_2P, HUNDRED_SEED_2P, HUNDRED_END_2P, HUNDRED_WEND_2P, HUNDRED_BSEED_2P, HUNDRED_WSEED_2P, HUNDRED_BEND_2P, PUFFER_WSEED_2P, PUFFER_BSEED_2P, COLLISION_SEED_2P, COLLISION_WWIN_2P, COLLISION_WEND_2P, COLLISION_BEND_2P, TWENTY_SQUARE_2P, FIFTEEN_SQUARE_2P } from "../utils/patterns";
 
 import { moveBlocks } from "../utils/move_blocks";
 
@@ -86,7 +86,7 @@ describe("Array2P", function () {
         await expect(cGoL.getEndBlock(1)).revertedWith("_gid game not yet created"); 
 
         await cGoL.connect(susan).setGameArray2P(2, 2, SOME_SEED_2P, duration, 5); 
-        await cGoL.connect(susan).setGameArray2P(4, 8, CUBE_SEED_2P, duration, 50);
+        await cGoL.connect(susan).setGameArray2P(5, 8, CUBE_SEED_2P, duration, 50);
         
         expect((await cGoL.getPlayerGames(susan.address)).toString()).to.equal("1,2");  
         expect(Number(await cGoL.getGameCount())).to.equal(3); 
@@ -115,7 +115,7 @@ describe("Array2P", function () {
     it("Should execute the game", async function () {
         //as per previous test, game 2 is in ONGOING state 
           
-        await cGoL.setGameArray2P(4, 8, CUBE_SEED_2P, 10, 1);  
+        await cGoL.setGameArray2P(5, 8, CUBE_SEED_2P, 10, 1);  
         await expect(cGoL.executeGame(3)).revertedWith("game must be in WAITING state");
         await cGoL.connect(susan).joinGame(3);  
         await expect(cGoL.executeGame(3)).revertedWith("need to reach end_block");   
@@ -196,6 +196,12 @@ describe("Array2P", function () {
         await cGoL.executeGame(11);   
         res = await cGoL.getGameGrid(11);  
         expect(arraysEqual(res, COLLISION_BEND_2P)).to.equal(true);
+
+
+        await cGoL.setGameArray2P(15, 15, FIFTEEN_SQUARE_2P, 1, 10); 
+        await cGoL.connect(susan).joinGame(12); 
+        await moveBlocks(15);  
+        await cGoL.executeGame(12); 
   
     })
     

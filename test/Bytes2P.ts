@@ -19,7 +19,7 @@ import { keccak256, stripZeros } from "ethers/lib/utils";
 //import { IERC20 } from "../typechain";
 import BigNumber from 'bignumber.js';
 import { Signer, BigNumberish } from "ethers";
-import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P, BLINKER_SEED_2P, BLINKER_ODD_2P, HUNDRED_SEED_2P, HUNDRED_END_2P, HUNDRED_WEND_2P, HUNDRED_BSEED_2P, HUNDRED_WSEED_2P, HUNDRED_BEND_2P, PUFFER_WSEED_2P, PUFFER_BSEED_2P, COLLISION_SEED_2P, COLLISION_WWIN_2P, COLLISION_WEND_2P, COLLISION_BEND_2P, bSOME_SEED_2P, bCUBE_SEED_2P } from "../utils/patterns";
+import { SOME_SEED, CUBE_SEED, O, l, BLINKER_SEED, BEACON_SEED, GLIDER_SEED, GLIDER_END, HUNDRED_SEED, HUNDRED_END, SOME_SEED_2P, CUBE_SEED_2P, BLINKER_SEED_2P, BLINKER_ODD_2P, HUNDRED_SEED_2P, HUNDRED_END_2P, HUNDRED_WEND_2P, HUNDRED_BSEED_2P, HUNDRED_WSEED_2P, HUNDRED_BEND_2P, PUFFER_WSEED_2P, PUFFER_BSEED_2P, COLLISION_SEED_2P, COLLISION_WWIN_2P, COLLISION_WEND_2P, COLLISION_BEND_2P, bSOME_SEED_2P, bCUBE_SEED_2P, bCUBE_SEED_2Pv, bBLINKER_SEED_2P, bBLINKER_ODD_2P, wbBLINKER_SEED_2P, bHUNDRED_WSEED_2P, bHUNDRED_WEND_2P, bHUNDRED_BSEED_2P, bHUNDRED_BEND_2P, bCOLLISION_SEED_2P, bCOLLISION_WWIN_2P, bCOLLISION_WEND_2P, bCOLLISION_BEND_2P, bTHIRSTY_SQUARE_2P, bTWENTY_SQUARE_2P } from "../utils/patterns";
 
 import { moveBlocks } from "../utils/move_blocks";
 
@@ -112,22 +112,103 @@ describe("Array2P", function () {
         await expect(cGoL.connect(bob).joinGame(2)).revertedWith("game must be in FRESH state"); 
     }) 
     it("Should execute the game", async function () {
-        //as per previous test, game 2 is in ONGOING state  
-        await cGoL.setGameArray2P(5, 8, bCUBE_SEED_2P, 10, 1);  
-        await expect(cGoL.executeGame(3)).revertedWith("game must be in WAITING state");
-        await cGoL.connect(susan).joinGame(3);  
-        await expect(cGoL.executeGame(3)).revertedWith("need to reach end_block");   
-        await moveBlocks(3); 
-        await expect(cGoL.executeGame(3)).revertedWith("need to reach end_block");  
+       
+/*
+        console.log(await cGoL.pseudoRandom());
         await moveBlocks(10);  
-        await cGoL.executeGame(3);   
-        expect(await cGoL.getGameState(3)).to.equal(2); 
-        await expect(cGoL.executeGame(3)).revertedWith("game must be in WAITING state");
-        await expect(cGoL.connect(susan).joinGame(3)).revertedWith("game must be in FRESH state");
-    
-        let res = await cGoL.getGameGrid(3);   
+        console.log(await cGoL.pseudoRandom());
+        await moveBlocks(1);  
+        console.log(await cGoL.pseudoRandom());
+        await moveBlocks(1);  
+        console.log(await cGoL.pseudoRandom());
+        await moveBlocks(3);  
+        console.log(await cGoL.pseudoRandom());
+        await moveBlocks(1);  
+        console.log(await cGoL.pseudoRandom());
+        */
+        await cGoL.setGameArray2P(5, 8, bCUBE_SEED_2P, 10, 2);  
+        await cGoL.connect(susan).joinGame(3);
+        await moveBlocks(10);  
+        await cGoL.executeGame(3);    
+
+        let res = await cGoL.getGameGrid(3);      
         expect(res).to.equal(bCUBE_SEED_2P);
-         
+
+ 
+        await cGoL.setGameArray2P(4, 8, bBLINKER_SEED_2P, 10, 8);  
+        await cGoL.connect(susan).joinGame(4);
+        await moveBlocks(10);  
+        await cGoL.executeGame(4);    
+
+        res = await cGoL.getGameGrid(4);  
+        expect(res).to.equal(bBLINKER_SEED_2P);
+
+ 
+        await cGoL.setGameArray2P(4, 8, bBLINKER_SEED_2P, 10, 1);  
+        await cGoL.connect(susan).joinGame(5);
+        await moveBlocks(10);  
+        await cGoL.executeGame(5);    
+
+        res = await cGoL.getGameGrid(5);      
+        expect(res).to.equal(bBLINKER_ODD_2P);
+
+
+ 
+        await cGoL.setGameArray2P(10, 10, bHUNDRED_WSEED_2P, 10, 8);  
+        await cGoL.connect(susan).joinGame(6);
+        await moveBlocks(10);  
+        await cGoL.executeGame(6);    
+
+        res = await cGoL.getGameGrid(6);  
+        expect(res).to.equal(bHUNDRED_WEND_2P);
+ 
+        await cGoL.setGameArray2P(10, 10, bHUNDRED_BSEED_2P, 10, 8);  
+        await cGoL.connect(susan).joinGame(7);
+        await moveBlocks(10);  
+        await cGoL.executeGame(7);    
+
+        res = await cGoL.getGameGrid(7);  
+        expect(res).to.equal(bHUNDRED_BEND_2P);
+        
+        await cGoL.setGameArray2P(3, 5, bCOLLISION_SEED_2P, 1, 1); 
+
+        await cGoL.setGameArray2P(3, 5, bCOLLISION_SEED_2P, 1, 1); 
+        await cGoL.connect(susan).joinGame(9); 
+        await moveBlocks(15);  
+        await cGoL.setRandomizer(9); 
+        await cGoL.executeGame(9);   
+        res = await cGoL.getGameGrid(9);  
+        expect(res).to.equal(bCOLLISION_WWIN_2P);  
+
+        await cGoL.setGameArray2P(3, 5, bCOLLISION_SEED_2P, 1, 10); 
+        await cGoL.connect(susan).joinGame(10); 
+        await moveBlocks(15);  
+        await cGoL.setRandomizer(10); 
+        await cGoL.executeGame(10);   
+        res = await cGoL.getGameGrid(10);   
+        expect(res).to.equal(bCOLLISION_WEND_2P);  
+ 
+        await cGoL.setGameArray2P(3, 5, bCOLLISION_SEED_2P, 1, 6); 
+        await cGoL.connect(susan).joinGame(11); 
+        await moveBlocks(15);  
+        await cGoL.setRandomizerBWin(11); 
+        await cGoL.executeGame(11);   
+        res = await cGoL.getGameGrid(11);   
+        expect(res).to.equal(bCOLLISION_BEND_2P);
+            
+        await cGoL.setGameArray2P(20, 20, bTWENTY_SQUARE_2P, 1, 10); 
+        await cGoL.connect(susan).joinGame(12); 
+        await moveBlocks(15);  
+        await cGoL.executeGame(12);   
+        //res = await cGoL.getGameGrid(12);    
+        
+
+        // SE not work
+        //  OK  OK  NOK
+        //  NOK NOK NOK
+        //  NOK NOK NOK
+        //
+        //
 
         /*
         await cGoL.setGameArray2P(4, 8, BLINKER_SEED_2P, 10, 8); 
