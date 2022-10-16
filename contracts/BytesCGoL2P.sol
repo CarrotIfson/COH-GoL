@@ -31,7 +31,7 @@ contract BGCOL {
             if(_seed[i]!="0" &&
                 _seed[i]!="1" &&
                 _seed[i]!="2") {
-                    revert("_seed must contain only {1,2,3} values");
+                    revert("_seed must contain only {0,1,2} values");
                 } 
             unchecked{ i++;}
         }
