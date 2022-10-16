@@ -252,8 +252,7 @@ contract BGCOL {
     }
 
     function pseudoRandom() public view returns(bytes1) {
-        //return uint8(keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
-        //msg.sender))[2] & 0x01);
+        //testing
         bytes32 b = keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
         msg.sender)); 
         return  bytes1(uint8(b[0] & 0x01)+1);
