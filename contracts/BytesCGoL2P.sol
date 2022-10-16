@@ -3,7 +3,9 @@ pragma solidity ^0.8.9;
 
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
-
+//TODO add betting logic
+//TODO add commit-reveal for player1 seed
+//TODO add logic to "add" a new pattern mid game
 contract BGCOL {  
     enum State { FRESH, WAITING, FINISHED}
     struct Game {
@@ -246,14 +248,11 @@ contract BGCOL {
         require(game_instances[_gid].end_block <= block.number, "need to reach end_block");
          
         game_instances[_gid].game_grid = runIterations(_gid); 
-        game_instances[_gid].state = State.FINISHED;   //TODO WHY IS THIS NOT UPDATING    
-        
+        game_instances[_gid].state = State.FINISHED;   
         //return 
     }
 
     function pseudoRandom() public view returns(bytes1) {
-        //return uint8(keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
-        //msg.sender))[2] & 0x01);
         bytes32 b = keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
         msg.sender)); 
         return  bytes1(uint8(b[0] & 0x01)+1);
