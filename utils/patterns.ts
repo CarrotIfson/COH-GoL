@@ -123,12 +123,14 @@ export const B = 2;
 
 
 export const SOME_SEED_2P = [E, W, B, E]; //
+export const bSOME_SEED_2P = "0120";
 
 
 export const CUBE_SEED_2P = [E, E, E, E, E, E, E, E, //7
                              W, W, E, E, E, E, E, E, //15
                              W, W, E, E, E, E, B, B, //23
-                             E, E, E, E, E, E, B, B] //31
+                             E, E, E, E, E, E, B, B] //31 
+export const bCUBE_SEED_2P = "0000000011000000110000220000002200000000";
 
 export const BLINKER_SEED_2P = [E, W, E, E, E, E, E, E,
                                 E, W, E, E, E, B, B, B,
