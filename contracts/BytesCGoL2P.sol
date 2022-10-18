@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+
 // Uncomment this line to use console.log
 import "hardhat/console.sol";
 //TODO add betting logic
@@ -29,7 +30,7 @@ contract BGCOL {
     uint256 private game_count; 
 
     function check_grid(bytes calldata _seed) private pure { 
-        for(uint i=0; i<bytes(_seed).length; ) {
+        for(uint i=0; i<_seed.length; ) {
             if(_seed[i]!="0" &&
                 _seed[i]!="1" &&
                 _seed[i]!="2") {

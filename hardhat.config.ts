@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-ethers";
 import * as dotenv from "dotenv";
-import "hardhat-gas-reporter";
+//import "hardhat-gas-reporter";
 dotenv.config({ path: __dirname + "/.env" });
 
 // You need to export an object to set up your config
@@ -13,15 +13,18 @@ dotenv.config({ path: __dirname + "/.env" });
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  gasReporter: {
+  /* gasReporter: {
     enabled: (process.env.REPORT_GAS) ? true : false
+  },*/ 
+  mocha: {
+    timeout: 100000000
   },
   solidity: {
     version: "0.8.10",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 500000,
+        runs: 1,
       }
     }/*,
     compilers: [

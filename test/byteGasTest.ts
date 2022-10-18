@@ -54,7 +54,7 @@ function logRectMatrix(rows:number, cols: number, m: Array) {
 }
 
 
-describe("Array2P", function () {
+describe("Bytes2P", function () {
     let owner: SignerWithAddress,
         susan: SignerWithAddress,
         bob: SignerWithAddress,

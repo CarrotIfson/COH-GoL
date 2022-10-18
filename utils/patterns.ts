@@ -125,6 +125,7 @@ export const B = 2;
 export const SOME_SEED_2P = [E, W, B, E]; //
 export const bSOME_SEED_2P = "0120";
 
+export const TEST_LAYOUT = "000010000"
 
 export const CUBE_SEED_2P = [E, E, E, E, E, E, E, E, //7
                              W, W, E, E, E, E, E, E, //15
