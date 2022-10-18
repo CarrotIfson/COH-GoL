@@ -153,7 +153,7 @@ describe("Bytes2P", function () {
         res = await lugol.getGameGrid(4);  
         expect(res).to.equal(bBLINKER_SEED_2P); 
  
-        await lugol.setGameArray2P(4, 8, bBLINKER_SEED_2P, 10, 3);  
+        await lugol.setGameArray2P(4, 8, bBLINKER_SEED_2P, 10, 1);  
         await lugol.connect(susan).joinGame(5);
         await moveBlocks(10);  
         await lugol.executeGame(5);   
