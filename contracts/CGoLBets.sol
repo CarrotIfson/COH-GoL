@@ -8,7 +8,7 @@ import "hardhat/console.sol";
 //TODO add commit-reveal for player1 seed
 //TODO add logic to "add" a new pattern mid game
 contract BGCOLBetting {  
-    enum State { FRESH, WAITING, FINISHED}
+    enum State { FRESH, WAITING, FINISHED, CLAIMED, CANCELED}
     struct Game {
         uint256 rows;
         uint256 cols;
@@ -28,6 +28,60 @@ contract BGCOLBetting {
     mapping(uint256 => Game) private game_instances ;
     mapping(address => uint256[]) private player_games; 
     uint256 private game_count; 
+    uint private dev_fee;
+    uint private dev_satchet;
+    address private owner;
+    
+    constructor() {
+        dev_fee = 1; //percent
+        owner = msg.sender;
+    }
+
+    function setDevFee(uint _dev_fee) public {
+        require(msg.sender == owner, "onlyOwner");
+        require(_dev_fee <= 10, "fee may not exceed 10% of bids");
+        dev_fee = _dev_fee;
+    }
+
+    function setWinner(uint _gid) public view returns(address) {
+        uint ones;
+        uint twos;
+        Game memory game = game_instances[_gid];
+        bytes memory grid = bytes(game.game_grid);
+
+        for(uint i = 0; i < grid.length; i++) {
+            if(grid[i]=='1') {
+                ones++;
+            } else if(grid[i]=='2') {
+                twos++;
+            }             
+        }
+
+        if(ones > twos) {
+            return game.player1;
+        } else if(ones < twos) {
+            return game.player2;
+        } else {
+            return address(0);
+        }
+    }
+    
+    function setWinnerAndClaim(uint _gid) gameExists(_gid) public {
+        require(game_instances[_gid].state == State.FINISHED, "game must be in FINISHED state");
+        game_instances[_gid].winner = setWinner(_gid);
+
+        if(game_instances[_gid].bid > 0) {
+            if(game_instances[_gid].winner==address(0)) {
+                //tie
+                uint i;
+            }else {
+                uint i; 
+            }
+            
+        }
+        game_instances[_gid].state = State.CLAIMED;
+    }
+    
 
     function check_grid(bytes calldata _seed, bytes1 player) private pure { 
         for(uint i=0; i<_seed.length; ) {
@@ -40,11 +94,13 @@ contract BGCOLBetting {
     }
    
 
-    function setGameArray2P(uint256 _rows, uint256 _cols, string calldata _seed, uint256 _duration, uint256 _iterations) public {
+    function setGameArray2P(uint256 _rows, uint256 _cols, string calldata _seed, uint256 _duration, uint256 _iterations, uint256 _bid_amount) public payable {
   
         require(_rows*_cols == bytes(_seed).length, "_rows and _cols dont match _seed");
         check_grid(bytes(_seed),'1');
-         
+
+        require(msg.value >= _bid_amount, "amount sent should be >= _bid_amount"); 
+
         //require(_grid_length < 15, "Max row length is 15"); TODO eventually see which is the biggest array we can handle with 60M Gas
         game_instances[game_count] = Game(
             _rows,
@@ -53,7 +109,7 @@ contract BGCOLBetting {
             _seed,
             msg.sender, 
             msg.sender, //player2
-            0, //bid
+            _bid_amount, //bid
             block.number,
             block.number + _duration,
             _iterations,
@@ -63,8 +119,14 @@ contract BGCOLBetting {
         );
         player_games[msg.sender].push(game_count);
         game_count++; 
+ 
+        if(msg.value-_bid_amount > 0) {
+            //refund any extra amount
+            payable(msg.sender).transfer(msg.value-_bid_amount);
+        }
     }
  
+
     function runIterations(uint _gid) private view returns(string memory){ //returns(uint8[] memory) {  
         
         //      c   c    c
@@ -232,10 +294,12 @@ contract BGCOLBetting {
         _;
     }
  
-    function joinGame(uint _gid, string calldata _seed) gameExists(_gid) public {
+    function joinGame(uint _gid, string calldata _seed) gameExists(_gid) public payable {
         require(game_instances[_gid].state == State.FRESH, "game must be in FRESH state");
         require(game_instances[_gid].player1 !=  msg.sender, "player1 cant join his own game");
         require(bytes(_seed).length == game_instances[_gid].grid_length, "non matching seeds");
+        require(msg.value >= game_instances[_gid].bid, "amount sent should be >= _bid_amount" );
+        
         check_grid(bytes(_seed),'2'); 
 
         game_instances[_gid].game_grid = merge_grids(_gid, bytes(_seed));
@@ -246,6 +310,12 @@ contract BGCOLBetting {
         game_instances[_gid].randomizer = keccak256(abi.encodePacked(block.timestamp,block.difficulty,  
         msg.sender)); 
         player_games[msg.sender].push(_gid);
+
+
+        if(msg.value-game_instances[_gid].bid > 0) {
+            //refund any extra amount
+            payable(msg.sender).transfer(msg.value-game_instances[_gid].bid);
+        }
     }
  
     function merge_grids(uint _gid, bytes memory _seed) private view returns(string memory) {
@@ -302,6 +372,11 @@ contract BGCOLBetting {
     }
     function getGameCount() public view returns (uint256) {
         return game_count;
+    }
+
+    function getWinner(uint _gid) gameExists(_gid) public view returns(address) {
+        require(game_instances[_gid].state == State.CLAIMED , "no winner determined");
+        return game_instances[_gid].winner;
     }
 
     //for testing purposes
