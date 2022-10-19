@@ -43,6 +43,12 @@ contract BGCOLBetting {
         dev_fee = _dev_fee;
     }
 
+    function claimDevEarnings() public {
+        uint amt = dev_satchet;
+        dev_satchet = 0; 
+        payable(owner).transfer(amt);
+    }
+
     function setWinner(uint _gid) public view returns(address) {
         uint ones;
         uint twos;
@@ -68,18 +74,23 @@ contract BGCOLBetting {
     
     function setWinnerAndClaim(uint _gid) gameExists(_gid) public {
         require(game_instances[_gid].state == State.FINISHED, "game must be in FINISHED state");
-        game_instances[_gid].winner = setWinner(_gid);
+        game_instances[_gid].winner = setWinner(_gid); 
+        game_instances[_gid].state = State.CLAIMED;
 
         if(game_instances[_gid].bid > 0) {
+            uint devs_cut = (game_instances[_gid].bid*2)/100*dev_fee;
+            uint remaining = (game_instances[_gid].bid*2)/100*(100-dev_fee); 
+            dev_satchet  += devs_cut;
             if(game_instances[_gid].winner==address(0)) {
-                //tie
-                uint i;
+                uint split = remaining / 2;
+                payable(game_instances[_gid].player1).transfer(split);
+                payable(game_instances[_gid].player2).transfer(split);
+
             }else {
-                uint i; 
+                payable(game_instances[_gid].winner).transfer(remaining);
             }
             
         }
-        game_instances[_gid].state = State.CLAIMED;
     }
     
 
@@ -378,6 +389,10 @@ contract BGCOLBetting {
         require(game_instances[_gid].state == State.CLAIMED , "no winner determined");
         return game_instances[_gid].winner;
     }
+    function getDevSatchet() public view returns(uint) {
+        return dev_satchet;
+    }
+
 
     //for testing purposes
     function setRandomizer(uint _gid) public {

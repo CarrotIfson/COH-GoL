@@ -153,8 +153,7 @@ describe("2PBets", function () {
         expect(res).to.equal(bBLINKER_SEED_ODD); 
     })
 
-    it("Should determine winner", async function () {
-
+    it("Should determine winner", async function () { 
         await cGoL.setGameArray2P(3, 4, bCUBE_EXP_1P, 10, 7, 0);  
         await cGoL.connect(susan).joinGame(6,bBLINKER_SEED_2P);
 
@@ -207,9 +206,90 @@ describe("2PBets", function () {
         await expect( cGoL.getWinner(8)).revertedWith("no winner determined");
         await cGoL.setWinnerAndClaim(8);
         res = await cGoL.getWinner(8);   
-        expect(res).to.equal("0x0000000000000000000000000000000000000000"); 
+        expect(res).to.equal("0x0000000000000000000000000000000000000000");  
+    })
+
+    it("Should handle the bids winner", async function () { 
+
+        let devSatchet = await cGoL.getDevSatchet();
+        let contract_bal = await provider.getBalance(cGoL.address); 
+        let winner_bal = await owner.getBalance();
+        await cGoL.setGameArray2P(3, 4, bCUBE_EXP_1P, 10, 7, parse18Dec(10), {value: parse18Dec(11)});  
+        await cGoL.connect(susan).joinGame(9,bBLINKER_SEED_2P, {value: parse18Dec(11)});
         
+        await expect( cGoL.setWinnerAndClaim(9)).revertedWith("game must be in FINISHED state");
+        await moveBlocks(10);  
+        let res = await cGoL.getGameGrid(9);      
+        expect(res).to.equal(bCUBE_BLINKER); 
+        await cGoL.executeGame(9);    
+        res = await cGoL.getGameGrid(9);      
+        expect(res).to.equal(bCUBE_BLINKER_ODD);  
+        await expect( cGoL.getWinner(9)).revertedWith("no winner determined");
+        await cGoL.setWinnerAndClaim(9);
+        res = await cGoL.getWinner(9);  
+        //require(res).to.equal(owner.address); 
+        expect(res).to.equal(owner.address); 
+        let updated_bal = await owner.getBalance();
+        res = parseWei(updated_bal)-parseWei(winner_bal); 
+        expect(res>9).to.equal(true);
+
+        winner_bal = await susan.getBalance(); 
+        let loser_bal = await owner.getBalance(); 
+        await cGoL.setGameArray2P(3, 4, bBLINKER_SEED_1P, 10, 7, parse18Dec(500), {value: parse18Dec(500)});  
+        await cGoL.connect(susan).joinGame(10,bCUBE_EXP_2P, {value: parse18Dec(500)});
         
+        await expect( cGoL.setWinnerAndClaim(10)).revertedWith("game must be in FINISHED state");
+        await moveBlocks(10);  
+        res = await cGoL.getGameGrid(10);      
+        expect(res).to.equal(bBLINKER_CUBE); 
+        await cGoL.executeGame(10);    
+        res = await cGoL.getGameGrid(10);      
+        expect(res).to.equal(bBLINKER_CUBE_ODD);  
+        await expect( cGoL.getWinner(10)).revertedWith("no winner determined");
+        await cGoL.setWinnerAndClaim(10);
+        res = await cGoL.getWinner(10);  
+        //require(res).to.equal(owner.address); 
+        expect(res).to.equal(susan.address); 
+        updated_bal = await susan.getBalance();
+        res = parseWei(updated_bal)-parseWei(winner_bal); 
+        expect(res>480).to.equal(true);
+        updated_bal = await owner.getBalance();
+        res = parseWei(loser_bal)-parseWei(updated_bal); 
+        expect(res>499).to.equal(true);
+
+
+        let p1_bal = await owner.getBalance(); 
+        let p2_bal = await susan.getBalance(); 
+        await cGoL.setGameArray2P(3, 4, bCUBE_EXP_1P, 10, 7, parse18Dec(500), {value: parse18Dec(500)});  
+        await cGoL.connect(susan).joinGame(11,bCUBE_EXP_2P, {value: parse18Dec(500)});
         
+        await expect( cGoL.setWinnerAndClaim(11)).revertedWith("game must be in FINISHED state");
+        await moveBlocks(11);  
+        res = await cGoL.getGameGrid(11);      
+        expect(res).to.equal(bCUBE_EXP_SEED); 
+        await cGoL.executeGame(11);    
+        res = await cGoL.getGameGrid(11);      
+        expect(res).to.equal(bCUBE_EXP_SEED);  
+        await expect( cGoL.getWinner(11)).revertedWith("no winner determined");
+        await cGoL.setWinnerAndClaim(11);
+        res = await cGoL.getWinner(11);     
+
+        let updated_p1_bal = await owner.getBalance(); 
+        let updated_p2_bal = await susan.getBalance();  
+
+        expect(parseWei(p1_bal)-parseWei(updated_p1_bal)>5).to.equal(true);
+        expect(parseWei(p2_bal)-parseWei(updated_p2_bal)>5).to.equal(true);
+
+        let updatedSatchet = await cGoL.getDevSatchet();
+        expect(parseWei(updatedSatchet)-parseWei(devSatchet)>=1000*0.01+1000*0.01+20*0.01).to.equal(true)
+        
+        let owner_balance = parseWei(await owner.getBalance());
+        await cGoL.claimDevEarnings();
+        let updated_owner_balance = parseWei(await owner.getBalance());
+
+            //take gas into account
+        expect(0.001+updated_owner_balance-owner_balance >= parseWei(updatedSatchet)).to.equal(true);
+        updatedSatchet = await cGoL.getDevSatchet();
+        expect(updatedSatchet==0).to.equal(true);
     })
 })
