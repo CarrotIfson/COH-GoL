@@ -99,12 +99,17 @@ describe("SFGOL", function () {
         await cGoL.connect(owner).setMagicNumber(1000);
         let res = await cGoL.estimateIterations(10*10*10);
         expect(Number(res)).to.equal(1);
+        res = await cGoL.estimateIterations(10*10*10+1);
+        expect(Number(res)).to.equal(2);
         res = await cGoL.estimateIterations(10*10*20);
         expect(Number(res)).to.equal(2);
         res = await cGoL.estimateIterations(10*10*19);
         expect(Number(res)).to.equal(2);
         res = await cGoL.estimateIterations(10*10*21);
         expect(Number(res)).to.equal(3);
+        await cGoL.connect(owner).setMagicNumber(1000);
+        res = await cGoL.estimateIterations(4*3*100);
+        expect(Number(res)).to.equal(2);
     });
 
     it("Should test createGame", async function () {
@@ -150,8 +155,6 @@ describe("SFGOL", function () {
         
     });
 
-
-
     it("Should join the game", async function() { 
         let gid = 2;
         await expect(cGoL.joinGame(gid, bCUBE_SEED_2P)).revertedWith("player1 cant join his own game");
@@ -182,7 +185,6 @@ describe("SFGOL", function () {
         //should not allow a player to join a canceled game
         await expect(cGoL.connect(susan).joinGame(0, bCUBE_SEED_2P)).revertedWith("game must be in FRESH state");
         
-        
         gid = 1;
         state = await cGoL.getGameState(gid);
         expect(state).to.equal(FRESH); 
@@ -192,16 +194,34 @@ describe("SFGOL", function () {
         gid = 2;
         state = await cGoL.getGameState(gid);
         expect(state).to.equal(JOINED); 
-        await expect(cGoL.cancelGame(gid)).revertedWith("can only cancel a FRESH game");;
-        
-
-        
+        await expect(cGoL.cancelGame(gid)).revertedWith("can only cancel a FRESH game");
     })
 
+    it("Should execute the game", async function() {
+        //Single iteration execution
+        let gid = Number(await cGoL.getGameCount());
+        let generations = 10;
+        let deadline = 600;
+        
+        await cGoL.createGame(3,4,bCUBE_EXP_1P,deadline,generations,0);
+        await expect(cGoL.executeGame(gid)).revertedWith("game must be in JOINED state");
+        await cGoL.connect(susan).joinGame(gid,bCUBE_EXP_2P);
+        await cGoL.executeGame(gid);
+        await expect(cGoL.executeGame(gid)).revertedWith("game must be in JOINED state");
+        gid += 1;
+        generations = 167;
+        await cGoL.createGame(3,4,bCUBE_EXP_1P,deadline,generations,0);
+        await expect(cGoL.executeGame(gid)).revertedWith("game must be in JOINED state");
+        await cGoL.connect(susan).joinGame(gid,bCUBE_EXP_2P);     
+        await cGoL.executeGame(gid);   
+        await cGoL.executeGame(gid);   
+        await cGoL.executeGame(gid);    
+        
+    })
 /*
     it("it should test 100cells per player", async function () {
          
-        let generations = 50;
+        let generations = 50;z
         await cGoL.setGameArray2P(10, 10, b1SEED_100P1, duration, generations, 0);   
         await cGoL.connect(susan).joinGame(gid,b1SEED_100P2);
         await moveBlocks(10);       

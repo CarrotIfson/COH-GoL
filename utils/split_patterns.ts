@@ -53,7 +53,6 @@ export const bCUBE_SEED_1P = "1111";
 export const bCUBE_SEED_2P = "2222";
 export const bCUBE_SEED    = "11221122";
 
-
 export const bCUBE_EXP_1P     = "011001100000";
 export const bCUBE_EXP_2P     = "022002200000"; 
 export const bCUBE_EXP_SEED = "011002200110022000000000";

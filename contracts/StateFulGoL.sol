@@ -22,6 +22,8 @@ contract SFGOL {
         uint bid;
         uint256 join_deadline_timestamp;
         uint256 generations;
+        uint256 generations_left;
+        uint256 generations_per_iteration;
         uint256 iterations_required;
         bytes32 randomizer;
     }
@@ -67,8 +69,9 @@ contract SFGOL {
   
         require(_rows*_cols == bytes(_seed).length, "_rows and _cols dont match _seed");
         require(msg.value >= _bid_amount, "amount sent should be >= _bid_amount"); 
-        
+
         _checkGrid(bytes(_seed),'1');
+        uint iterations = _estimateIterations(_rows*_cols*_generations);
         game_instances[game_count] = Game(
             _rows,
             _cols,
@@ -82,7 +85,9 @@ contract SFGOL {
             _bid_amount, //bi6d
             block.timestamp + _duration,
             _generations,
-            _estimateIterations(_rows*_cols*_generations),
+            _generations,
+            myDiv(_generations, iterations),
+            iterations,
             bytes32(0)
         );
         player_games[msg.sender].push(game_count);
@@ -102,15 +107,7 @@ contract SFGOL {
     }
  
     function _estimateIterations(uint256 compute_size) private view returns (uint256) { 
-        if(compute_size>magic_number) {
-            return (compute_size+1)/magic_number;
-        }
-        return 1;
-    }
-
-
-    function estimateIterations(uint256 compute_size) public view returns (uint256) {  ///TEST FNC
-        if(compute_size>magic_number) {
+        /*if(compute_size>magic_number) {
             uint quo = compute_size/magic_number;
             uint rem = compute_size - (magic_number*quo);
             if(rem > 0) {
@@ -119,6 +116,25 @@ contract SFGOL {
             return quo;
         }
         return 1;
+        */
+       return myDiv(compute_size, magic_number);
+    }
+
+    function myDiv(uint dividend, uint divisor) private pure returns (uint) {
+        if(dividend>divisor) {
+            uint quo = dividend/divisor;
+            uint rem = dividend - (divisor*quo);
+            if(rem > 0) {
+                return quo+1;
+            }
+            return quo;
+        }
+        return 1;
+    }
+
+
+    function estimateIterations(uint256 compute_size) public view returns (uint256) {  ///TEST FNC
+        return _estimateIterations(compute_size);
     }
 
     function _checkGrid(bytes calldata _seed, bytes1 player) private pure { 
@@ -136,16 +152,9 @@ contract SFGOL {
         Game memory game = game_instances[_gid];
         bytes memory p1_grid = bytes(game.initial_seed);
         bytes memory new_grid = new bytes(game.grid_length*2); 
-        //console.log("p1_grid sz: ", p1_grid.length);
-        //console.log("p2_grid size: ", _seed.length);
-        //console.log("new_grid size: ", game.grid_length*2);
         uint i = 0;    
         for(uint r=0; r<game.rows; r++) {
-            for(uint c=0; c<game.cols; c++) {  
-                //console.log("i: ", i);
-                //console.log("2*r*game.cols+c: ", 2*r*game.cols+c);
-                //console.log("2*r*game.cols+game.cols+c: ", 2*r*game.cols+game.cols+c);
-                
+            for(uint c=0; c<game.cols; c++) { 
                 new_grid[2*r*game.cols+c] = p1_grid[i];
                 new_grid[2*r*game.cols+game.cols+c] = _seed[i];
                 i++; 
@@ -160,7 +169,7 @@ contract SFGOL {
         require(game_instances[_gid].player1 !=  msg.sender, "player1 cant join his own game");
         require(bytes(_seed).length == game_instances[_gid].grid_length, "non matching seeds");
         require(msg.value >= game_instances[_gid].bid, "amount sent should be >= _bid_amount" );
-        if(game_instances[_gid].bid == 0 && msg.value >= 0) {
+        if(game_instances[_gid].bid == 0 && msg.value > 0) {
             revert("this _gid does not accept bets");
         } 
         _checkGrid(bytes(_seed),'2'); 
@@ -179,6 +188,213 @@ contract SFGOL {
         if(msg.value-game_instances[_gid].bid > 0) {
             //refund any extra amount
             payable(msg.sender).transfer(msg.value-game_instances[_gid].bid);
+        }
+    }
+
+
+    function executeGame(uint _gid) gameExists(_gid) public {//returns(uint8[] memory) {
+        require(game_instances[_gid].state == State.JOINED 
+                || game_instances[_gid].state == State.APPEALED, "game must be in JOINED state");
+        
+        Game storage game_instance = game_instances[_gid];
+
+        uint generations_to_execute = game_instance.generations_per_iteration > game_instance.generations_left ? game_instance.generations_left : game_instance.generations_per_iteration; 
+        
+        game_instance.game_grid = runIterations(_gid, generations_to_execute);
+        game_instance.generations_left -= generations_to_execute;
+        console.log(generations_to_execute);
+        if(game_instance.generations_left == 0) {
+            game_instance.state = State.RESOLVED;
+            game_instance.winner = setWinner(bytes(game_instance.game_grid), game_instance.player1, game_instance.player2);
+        }
+        //TODO refund gas?
+        //TODO if coming from APPEALED, the submitter deposit should be given to the appealer
+
+        
+    }
+
+    function runIterations(uint _gid, uint iterations) private view returns(string memory){ //returns(uint8[] memory) {  
+        
+        //      c   c    c
+        //  r   NW  N   NE
+        //  r   W  CELL  E
+        //  r   SW  S   SE   
+
+        Game memory game = game_instances[_gid];
+        bytes memory game_grid = bytes(game_instances[_gid].game_grid);   
+        bytes memory _res_game_grid;// = bytes(game_instances[_gid].game_grid); // = bytes(game_instances[_gid].game_grid); 
+ 
+        bool isLeftCol;
+        bool isRightCol;
+
+        uint8 wNeigh;
+        uint8 bNeigh;
+
+        uint256 cell;  
+        uint256 bottom_delimiter = (game.rows-1)*game.cols;
+    
+        uint256 top_delta;
+        uint256 bottom_delta;
+
+        uint8 diff;
+        for(uint i=0; i<iterations; ) {  
+            _res_game_grid = new bytes(game.grid_length);
+            for(cell=0; cell<game.grid_length; ) {  
+                wNeigh = 0;
+                bNeigh = 0; 
+
+                isLeftCol = cell % game.cols == 0; 
+                isRightCol = (cell+1) % game.cols == 0; 
+                
+                if(cell >= game.cols) { //!isTopRow
+                    top_delta = cell-game.cols;
+                    // NW
+                    if(!isLeftCol) { 
+                        if(game_grid[top_delta-1] == '1') {
+                            wNeigh++;
+                        } else if (game_grid[top_delta-1] == '2') {
+                            bNeigh++; 
+                        }
+                    } 
+                    // N 
+                    if(game_grid[top_delta] == '1') {
+                        wNeigh++;
+                    } else if (game_grid[top_delta] == '2') {
+                        bNeigh++; 
+                    }
+                    // NE
+                    if(!isRightCol) {
+                        if(game_grid[top_delta+1] == '1') {
+                            wNeigh++;
+                        } else if (game_grid[top_delta+1] == '2') {
+                            bNeigh++; 
+                        }
+                    }
+
+                }
+
+                if(cell < bottom_delimiter) { //!isBottomRow
+                    bottom_delta = cell+game.cols;
+                    // SW
+                    if(!isLeftCol) {
+                        if(game_grid[bottom_delta-1] == '1') {
+                            wNeigh++;
+                        } else if (game_grid[bottom_delta-1] == '2') {
+                            bNeigh++; 
+                        }
+                    } 
+                    // S 
+                    if(game_grid[bottom_delta] == '1') {
+                        wNeigh++;
+                    } else if (game_grid[bottom_delta] == '2') {
+                        bNeigh++; 
+                    }
+                    // SE
+                    if(!isRightCol) {
+                        if(game_grid[bottom_delta+1] == '1') {
+                            wNeigh++;
+                        } else if (game_grid[bottom_delta+1] == '2') {
+                            bNeigh++; 
+                        }
+                    }
+                }
+ 
+                // W
+                if(!isLeftCol){ 
+                    if(game_grid[cell-1] == '1') {
+                        wNeigh++;
+                    } else if (game_grid[cell-1] == '2') {
+                        bNeigh++; 
+                    }
+                } 
+                // E
+                if(!isRightCol) {
+                    if(game_grid[cell+1] == '1') {
+                        wNeigh++;
+                    } else if (game_grid[cell+1] == '2') {
+                        bNeigh++; 
+                    }
+                } 
+                 
+                if(game_grid[cell]=='0') { //EMPTY
+                    if(wNeigh == 3) { //If has 3 wNei
+                        if(bNeigh == 3) { //AND 3 bNei
+                            //choose randomly
+                            if(uint8(game.randomizer[(i+cell)%32] & 0x01) == 0) { 
+                                _res_game_grid[cell] = '1';
+                            } else {
+                                _res_game_grid[cell] = '2'; 
+                            } 
+                            
+                        } else {            //if bNei != 3 
+                            _res_game_grid[cell] = '1';
+                        }
+                    } else if (bNeigh == 3) { // if bNei is 3
+                        _res_game_grid[cell] = '2'; 
+                    } else {
+                        _res_game_grid[cell] = '0'; 
+                    }
+                } else  {  
+                        
+                    if(bNeigh > wNeigh) {
+                        diff = bNeigh - wNeigh;
+                    } else {
+                        diff = wNeigh - bNeigh; 
+                    }
+                    
+                    if (game_grid[cell]=='1') { //WHITE 
+                        if(diff == 1 && wNeigh == 1) {
+                            _res_game_grid[cell] = '0';  
+                        }
+                        else if(diff != 2 && diff != 3) {
+                            _res_game_grid[cell] = '0'; 
+                        }  
+                        else {
+                            _res_game_grid[cell] = '1';
+                        }
+                    } else {        
+                        if(diff == 1 && bNeigh == 1) {
+                            _res_game_grid[cell] = '0';  
+                        }
+                        else if(diff != 2 && diff != 3) {
+                            _res_game_grid[cell] = '0'; 
+                        }
+                        else {
+                            _res_game_grid[cell] = '2';
+                        }
+                    }
+                } 
+                unchecked{cell++;}
+
+            } 
+            game_grid = _res_game_grid;
+            unchecked{i++;}
+        }
+        
+        return string(game_grid);
+    }
+
+    function setWinner(bytes memory grid, address p1, address p2) public pure returns(address) {
+        uint ones;
+        uint twos;
+        /*
+        Game memory game = game_instances[_gid];
+        bytes memory grid = bytes(game.game_grid);
+        */
+        for(uint i = 0; i < grid.length; i++) {
+            if(grid[i]=='1') {
+                ones++;
+            } else if(grid[i]=='2') {
+                twos++;
+            }             
+        }
+
+        if(ones > twos) {
+            return p1;
+        } else if(ones < twos) {
+            return p2;
+        } else {
+            return address(0);
         }
     }
 
@@ -508,7 +724,9 @@ contract SFGOL {
     function getGameCount() public view returns (uint256) {
         return game_count;
     }
-
+    function getIterationsRequired(uint _gid) gameExists(_gid) public view returns (uint256) {
+        return game_instances[_gid].iterations_required;
+    }
     function getWinner(uint _gid) gameExists(_gid) public view returns(address) {
         require(game_instances[_gid].state == State.CLAIMED , "no winner determined");
         return game_instances[_gid].winner;
