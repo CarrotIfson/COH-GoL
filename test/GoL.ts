@@ -75,7 +75,7 @@ describe("SFGOL", function () {
         [owner, susan, bob, carl] = await ethers.getSigners();
         const CGoL = await ethers.getContractFactory("SFGOL", owner);
         cGoL = await CGoL.deploy();
-        console.log(`\tDeployed CGoL contract at ${cGoL.address}`); 
+        console.log(`\tDeployed CGoL contract at ${cGoL.address}`);  
     });
 
     it("Should test owner functions", async function () {
@@ -110,6 +110,8 @@ describe("SFGOL", function () {
         await cGoL.connect(owner).setMagicNumber(1000);
         res = await cGoL.estimateIterations(4*3*100);
         expect(Number(res)).to.equal(2);
+        res = await cGoL.estimateIterations(0);
+        expect(Number(res)).to.equal(1);
     });
 
     it("Should test createGame", async function () {
@@ -216,6 +218,27 @@ describe("SFGOL", function () {
         await cGoL.executeGame(gid);   
         await cGoL.executeGame(gid);   
         await cGoL.executeGame(gid);    
+        let state = await cGoL.getGameState(gid);
+        expect(state).to.equal(RESOLVED); 
+        let game_grid = await cGoL.getGameGrid(gid);
+        expect(game_grid).to.equal(bCUBE_EXP_SEED); 
+
+        //Testing game results
+        gid += 1;
+        generations = 20;
+        await cGoL.createGame(3,4,bBLINKER_SEED_1P,deadline,generations,0);
+        await cGoL.connect(susan).joinGame(gid,bBLINKER_SEED_2P);     
+        await cGoL.executeGame(gid);   
+        game_grid = await cGoL.getGameGrid(gid);
+        expect(game_grid).to.equal(bBLINKER_SEED); 
+
+        gid += 1;
+        generations = 27;
+        await cGoL.createGame(3,4,bBLINKER_SEED_1P,deadline,generations,0);
+        await cGoL.connect(susan).joinGame(gid,bBLINKER_SEED_2P);     
+        await cGoL.executeGame(gid);   
+        game_grid = await cGoL.getGameGrid(gid);
+        expect(game_grid).to.equal(bBLINKER_SEED_ODD); 
         
     })
 /*

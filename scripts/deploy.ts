@@ -2,7 +2,7 @@ import { ethers, hardhatArguments } from "hardhat";
 import { bFIFTEEN_SQUARE_2P, bTWENTY_SQUARE_2P, FIFTEEN_SQUARE_2P, HUNDRED_BEND_2P, HUNDRED_SEED, PUFFER_BSEED_2P, THIRTY_SQUARE_2P, TWENTYTEN_RECT_2P, TWENTY_SQUARE_2P } from "../utils/patterns";
 import  * as Config from "./config";
 import { ABI } from "../utils/abi";
-import { b2SEED_100P1, b2SEED_100P2 } from "../utils/split_patterns";
+import { b2SEED_100P1, b2SEED_100P2, bCUBE_SEED_1P, bCUBE_SEED_2P } from "../utils/split_patterns";
 
 async function main() {
   await Config.initConfig();
@@ -63,18 +63,35 @@ async function main() {
   await cGoL.executeGame(1);  
   Config.setConfig(network + '.cGoL', cGoL.address);
   */
-
+  /*
 
   const BCGoL = await ethers.getContractFactory("BGCOLBetting");
   const bcGoL = await BCGoL.deploy();
+  
   await bcGoL.setGameArray2P(10, 10, b2SEED_100P1, 1, 30, 0);  
   await delay(10000);   
   await bcGoL.connect(susan).joinGame(0,b2SEED_100P2); 
   await delay(10000);  
   
   await bcGoL.executeGame(0);   
-  Config.setConfig(network + '.bcGoL', bcGoL.address);
   
+  Config.setConfig(network + '.bcGoL', bcGoL.address);
+
+
+  await bcGoL.setGameArray2P(10, 10, b2SEED_100P1, 1, 30, 0);  
+  await delay(10000);   
+  //await bcGoL.connect(susan).joinGame(0,b2SEED_100P2); 
+  //await delay(10000);  
+  
+
+  */
+  const CGoL = await ethers.getContractFactory("SFGOL");
+  const cGoL = await CGoL.deploy();
+  await cGoL.createGame(2,2,bCUBE_SEED_1P,10,20,0); 
+  await delay(10000);   
+  await cGoL.connect(susan).joinGame(0, bCUBE_SEED_2P);
+
+  Config.setConfig(network + '.cGoL', cGoL.address);
   await Config.updateConfig();
 
 

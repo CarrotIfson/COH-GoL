@@ -107,16 +107,6 @@ contract SFGOL {
     }
  
     function _estimateIterations(uint256 compute_size) private view returns (uint256) { 
-        /*if(compute_size>magic_number) {
-            uint quo = compute_size/magic_number;
-            uint rem = compute_size - (magic_number*quo);
-            if(rem > 0) {
-                return quo+1;
-            }
-            return quo;
-        }
-        return 1;
-        */
        return myDiv(compute_size, magic_number);
     }
 
@@ -201,8 +191,7 @@ contract SFGOL {
         uint generations_to_execute = game_instance.generations_per_iteration > game_instance.generations_left ? game_instance.generations_left : game_instance.generations_per_iteration; 
         
         game_instance.game_grid = runIterations(_gid, generations_to_execute);
-        game_instance.generations_left -= generations_to_execute;
-        console.log(generations_to_execute);
+        game_instance.generations_left -= generations_to_execute; 
         if(game_instance.generations_left == 0) {
             game_instance.state = State.RESOLVED;
             game_instance.winner = setWinner(bytes(game_instance.game_grid), game_instance.player1, game_instance.player2);
@@ -397,30 +386,7 @@ contract SFGOL {
             return address(0);
         }
     }
-
-    /*
-    function setWinner(uint _gid) public view returns(address) {
-        uint ones;
-        uint twos;
-        Game memory game = game_instances[_gid];
-        bytes memory grid = bytes(game.game_grid);
-
-        for(uint i = 0; i < grid.length; i++) {
-            if(grid[i]=='1') {
-                ones++;
-            } else if(grid[i]=='2') {
-                twos++;
-            }             
-        }
-
-        if(ones > twos) {
-            return game.player1;
-        } else if(ones < twos) {
-            return game.player2;
-        } else {
-            return address(0);
-        }
-    }
+/*
     
     function setWinnerAndClaim(uint _gid) gameExists(_gid) public {
         require(game_instances[_gid].state == State.FINISHED, "game must be in FINISHED state");
