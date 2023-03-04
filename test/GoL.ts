@@ -67,6 +67,8 @@ describe("SFGOL", function () {
           ,APPEALED = 5
           ,RESOLVED = 6
           ,CLAIMED = 7;
+    
+    const zero_addr = "0x0000000000000000000000000000000000000000";
     /*
     this.beforeEach(async () => { 
     })
@@ -132,7 +134,7 @@ describe("SFGOL", function () {
         let gid = 0;
         res = await cGoL.getGameState(gid);
         expect(Number(res)).to.equal(FRESH); //FRESH
-        await expect(cGoL.getWinner(gid)).revertedWith("no winner determined");;
+        await expect(cGoL.getWinner(gid)).revertedWith("game must be in RESOLVED state");;
         let ts = await getBlockTimestamp();
         expect(Number(await cGoL.getDeadline(gid))).to.equal(ts+deadline);
         expect(await cGoL.getGridLength(gid)).to.equal(4);
@@ -217,6 +219,7 @@ describe("SFGOL", function () {
         await cGoL.connect(susan).joinGame(gid,bCUBE_EXP_2P);     
         await cGoL.executeGame(gid);   
         await cGoL.executeGame(gid);   
+        await expect(cGoL.getWinner(gid)).revertedWith("game must be in RESOLVED state");
         await cGoL.executeGame(gid);    
         let state = await cGoL.getGameState(gid);
         expect(state).to.equal(RESOLVED); 
@@ -235,10 +238,12 @@ describe("SFGOL", function () {
         gid += 1;
         generations = 27;
         await cGoL.createGame(3,4,bBLINKER_SEED_1P,deadline,generations,0);
-        await cGoL.connect(susan).joinGame(gid,bBLINKER_SEED_2P);     
+        await cGoL.connect(susan).joinGame(gid,bBLINKER_SEED_2P);   
         await cGoL.executeGame(gid);   
         game_grid = await cGoL.getGameGrid(gid);
         expect(game_grid).to.equal(bBLINKER_SEED_ODD); 
+        let winner = await cGoL.getWinner(gid);
+        expect(winner).to.equal(zero_addr)
         
     })
 /*
